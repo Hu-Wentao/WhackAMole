@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/constraintLayout"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <!--<Button-->
+        <!--android:id="@+id/id_start_next"-->
+        <!--android:layout_width="180dp"-->
+        <!--android:layout_height="45dp"-->
+        <!--android:layout_gravity="center_horizontal|bottom"-->
+        <!--android:layout_marginBottom="45dp"-->
+        <!--android:background="@drawable/shape_radius_button"-->
+        <!--android:gravity="center"-->
+        <!--android:text="开始游戏"-->
+        <!--android:textColor="#ffffff"-->
+        <!--android:textSize="18sp"-->
+        <!--android:textStyle="bold"/>-->
+    <Button
+        android:id="@+id/btn_normal"
+        android:layout_width="150dp"
+        android:layout_height="wrap_content"
+        android:background="@drawable/shape_radius_button"
+        android:text="开始游戏"
+        android:textColor="#ffffff"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <Button
+        android:id="@+id/btn_challenge"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:background="@drawable/shape_radius_button"
+        android:text="挑战模式"
+        android:textColor="#ffffff"
+        app:layout_constraintEnd_toEndOf="@+id/btn_normal"
+        app:layout_constraintStart_toStartOf="@+id/btn_normal"
+        app:layout_constraintTop_toBottomOf="@+id/btn_normal" />
+
+    <Button
+        android:id="@+id/btn_rank"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:background="@drawable/shape_radius_button"
+        android:text="排行榜"
+        android:textColor="#ffffff"
+        app:layout_constraintEnd_toEndOf="@+id/btn_normal"
+        app:layout_constraintStart_toStartOf="@+id/btn_normal"
+        app:layout_constraintTop_toBottomOf="@+id/btn_challenge" />
+
+    <Button
+        android:id="@+id/btn_setting"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:background="@drawable/shape_radius_button"
+        android:text="设置"
+        android:textColor="#ffffff"
+        app:layout_constraintEnd_toEndOf="@+id/btn_normal"
+        app:layout_constraintStart_toStartOf="@+id/btn_normal"
+        app:layout_constraintTop_toBottomOf="@+id/btn_rank" />
+</android.support.constraint.ConstraintLayout>
