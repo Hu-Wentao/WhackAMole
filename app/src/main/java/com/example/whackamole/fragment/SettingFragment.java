@@ -9,6 +9,11 @@ import com.example.whackamole.base.BaseFragment;
  */
 public class SettingFragment extends BaseFragment {
     @Override
+    public boolean needHandleBackPress() {
+        return true;
+    }
+
+    @Override
     protected void doInit() {
 
     }

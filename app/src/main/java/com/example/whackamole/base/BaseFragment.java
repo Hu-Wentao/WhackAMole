@@ -14,9 +14,11 @@ import butterknife.ButterKnife;
 /**
  * 基础Fragment
  */
-public abstract class BaseFragment extends Fragment {
-
+public abstract class BaseFragment extends Fragment{
     private static final String PARAM_BASE_FRAGMENT_STATE = "baseFragmentState";
+
+    protected BackHandledInterface mBackHandledInterface;
+    public abstract boolean needHandleBackPress();  // 是否需要处理返回事件
 
     protected View mRootView;
     protected Context mContext;
@@ -41,6 +43,17 @@ public abstract class BaseFragment extends Fragment {
         if (mBundle == null) {
             mBundle = getArguments();
         }
+        if(!(getActivity() instanceof BackHandledInterface)){
+            throw new ClassCastException("Hosting Activity must implement BackHandledInterface");
+        }else{
+            this.mBackHandledInterface = (BackHandledInterface)getActivity();
+        }
+    }
+    @Override
+    public void onStart() {
+        super.onStart();
+        // 处理返回按钮事件
+        mBackHandledInterface.setCurrentTopFragment(this);
     }
 
     @Override
@@ -69,7 +82,6 @@ public abstract class BaseFragment extends Fragment {
         }
 
         if (0 != getLayoutName()) {
-
 //            if (isNeedShowLoadingView()) {
 //                //需要加载动画
 //                //mRootView = inflateWitchBlankLoading(inflater, getLayoutName());

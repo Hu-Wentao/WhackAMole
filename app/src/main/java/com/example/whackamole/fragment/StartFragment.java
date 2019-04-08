@@ -24,6 +24,11 @@ public class StartFragment extends BaseFragment implements View.OnClickListener 
 //    @BindView(R.id.btn_setting) Button mBtnSetting;
 
     @Override
+    public boolean needHandleBackPress() {
+        return true;
+    }
+
+    @Override
     protected void doInit() {
 //        mBtnNormalModel.setSelected(true);
 //        mBtnNormalModel.setOnClickListener(new View.OnClickListener() {

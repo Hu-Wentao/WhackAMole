@@ -14,6 +14,9 @@ public class AppDate {
     public static final String SCORE_ARR_STRING = "top3Score";  // 存放前三的分数, 以空格隔开
     public static final String IS_NORMAL_GAME_MODEL = "currentGameModel"; // 存放当前游戏模式(普通还是挑战)
 
+    //--------
+
+
     private static synchronized SharedPreferences getPreferences(Context c){
         if(preferences == null){
             preferences = c.getSharedPreferences(APP_DATE, Context.MODE_PRIVATE);

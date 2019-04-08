@@ -8,7 +8,10 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import android.view.Window;
+import android.widget.Toast;
 
+import com.example.whackamole.base.BackHandledInterface;
+import com.example.whackamole.base.BaseFragment;
 import com.example.whackamole.fragment.GameFragment;
 import com.example.whackamole.fragment.RankFragment;
 import com.example.whackamole.fragment.SettingFragment;
@@ -20,16 +23,17 @@ import java.util.ArrayList;
  * Created by magical.zhang on 2018/5/21.
  * Description : 兴趣标签、（游戏主体、打招呼）
  */
-public class GameMainActivity extends AppCompatActivity {
+public class GameMainActivity extends AppCompatActivity implements BackHandledInterface {
 
-//    private static final String EXTRA_PAGE = "extra_page";
-    private ArrayList<Fragment> mFragmentList = new ArrayList<>();
     private StartFragment mStartFragment;
     private GameFragment mGameFragment;
     private RankFragment mRankFragment;
     private SettingFragment mSettingFragment;
-//    private GameMainFragment mGameFragment;   //暂时不用
-//    private GameResultFragment mResultFragment;// 暂时不用
+    private ArrayList<Fragment> mFragmentList = new ArrayList<>();
+
+    private BaseFragment mBackHandleFragment;
+
+    private long canQuitActivity;    // 实现两次返回键退出应用的功能
     private int score;
     public int getScore() {
         return score;
@@ -52,10 +56,10 @@ public class GameMainActivity extends AppCompatActivity {
         mRankFragment = new RankFragment();
         mSettingFragment = new SettingFragment();
 
-        mFragmentList.add(mStartFragment);
-        mFragmentList.add(mGameFragment);
-        mFragmentList.add(mRankFragment);
-        mFragmentList.add(mSettingFragment);
+        mFragmentList.add(mStartFragment);  // 0
+        mFragmentList.add(mGameFragment);   // 1
+        mFragmentList.add(mRankFragment);   // 2
+        mFragmentList.add(mSettingFragment);// 3
     }
 
     public void changePage(int index) {
@@ -89,6 +93,27 @@ public class GameMainActivity extends AppCompatActivity {
         }
     }
 
+    @Override
+    public void setCurrentTopFragment(BaseFragment topFragment) {
+        mBackHandleFragment = topFragment;
+    }
+
+    @Override
+    public void onBackPressed() {
+//        if(mBackHandleFragment == null || !mBackHandleFragment.needHandleBackPress()){
+        if(mBackHandleFragment.needHandleBackPress()){
+            canQuitActivity = System.currentTimeMillis();
+            changePage(0);
+        }
+        if(mBackHandleFragment == mStartFragment || mBackHandleFragment == mGameFragment){
+            if(System.currentTimeMillis() - canQuitActivity < 300){
+                this.finish();
+            }else {
+                Toast.makeText(this, "双击返回键退出App", Toast.LENGTH_SHORT).show();
+                canQuitActivity = System.currentTimeMillis();
+            }
+        }
+    }
 //    @Override
 //    public boolean onKeyDown(int keyCode, KeyEvent event) {
 //        //游戏页屏蔽返回键

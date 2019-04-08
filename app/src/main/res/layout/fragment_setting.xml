@@ -11,12 +11,14 @@
         android:layout_width="150dp"
         android:layout_height="wrap_content"
         android:background="@drawable/shape_radius_button"
-        android:text="开始游戏"
+        android:text="音效"
         android:textColor="#ffffff"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.164"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.436" />
 
     <Button
         android:id="@+id/btn_challenge"
@@ -24,33 +26,10 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="16dp"
         android:background="@drawable/shape_radius_button"
-        android:text="挑战模式"
+        android:text="震动"
         android:textColor="#ffffff"
         app:layout_constraintEnd_toEndOf="@+id/btn_normal"
         app:layout_constraintStart_toStartOf="@+id/btn_normal"
         app:layout_constraintTop_toBottomOf="@+id/btn_normal" />
 
-    <Button
-        android:id="@+id/btn_rank"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="16dp"
-        android:background="@drawable/shape_radius_button"
-        android:text="排行榜"
-        android:textColor="#ffffff"
-        app:layout_constraintEnd_toEndOf="@+id/btn_normal"
-        app:layout_constraintStart_toStartOf="@+id/btn_normal"
-        app:layout_constraintTop_toBottomOf="@+id/btn_challenge" />
-
-    <Button
-        android:id="@+id/btn_setting"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="16dp"
-        android:background="@drawable/shape_radius_button"
-        android:text="设置"
-        android:textColor="#ffffff"
-        app:layout_constraintEnd_toEndOf="@+id/btn_normal"
-        app:layout_constraintStart_toStartOf="@+id/btn_normal"
-        app:layout_constraintTop_toBottomOf="@+id/btn_rank" />
 </android.support.constraint.ConstraintLayout>

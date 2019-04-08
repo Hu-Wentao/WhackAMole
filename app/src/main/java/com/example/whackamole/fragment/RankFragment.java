@@ -1,7 +1,6 @@
 package com.example.whackamole.fragment;
 
 import android.util.Log;
-import android.view.CollapsibleActionView;
 import android.view.View;
 import android.widget.TextView;
 
@@ -18,18 +17,22 @@ import java.util.Arrays;
  */
 public class RankFragment extends BaseFragment {
     @Override
+    public boolean needHandleBackPress() {
+        return true;    // 如果处理返回事件, 则返回true
+    }
+
+    @Override
     protected void doInit() {
         // 查询AppDate, defaultVal 必须为 " " 才能正确的显示结果
         String[] scoreArr = AppDate.getString(getContext(), AppDate.SCORE_ARR_STRING, " ").split(" ");
 
-//        scoreArr = new String[]{"12", "343", "01"};   //fake info
         if(scoreArr.length == 0){
             setVisibilityScoreTips(true);
         }else{
             setVisibilityScoreTips(false);
             Arrays.sort(scoreArr);
-            for (int i = 0; i < scoreArr.length; i++) {
-                switch (i) {
+            for (int i = scoreArr.length - 1; i >= 0; i--) {
+                switch (scoreArr.length-1 -i) {
                     case 0:
                         findViewById(R.id.tvScore_1).setVisibility(View.VISIBLE);
                         findViewById(R.id.tvShow1).setVisibility(View.VISIBLE);
