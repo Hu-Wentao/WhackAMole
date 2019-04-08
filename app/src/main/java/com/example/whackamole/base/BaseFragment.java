@@ -88,9 +88,9 @@ public abstract class BaseFragment extends Fragment {
         return super.onCreateView(inflater, container, savedInstanceState);
     }
 
-    protected abstract void doLoadData();
-
     protected abstract void doInit();
+
+    protected abstract void doLoadData();
 
     /**
      * 是否开启加载动画

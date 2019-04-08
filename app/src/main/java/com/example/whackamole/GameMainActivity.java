@@ -7,8 +7,13 @@ import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
-import android.view.KeyEvent;
 import android.view.Window;
+
+import com.example.whackamole.fragment.ChallengeFragmet;
+import com.example.whackamole.fragment.NormalFragment;
+import com.example.whackamole.fragment.RankFragmet;
+import com.example.whackamole.fragment.SettingFragmet;
+import com.example.whackamole.fragment.StartFragment;
 
 import java.util.ArrayList;
 
@@ -20,9 +25,12 @@ public class GameMainActivity extends AppCompatActivity {
 
 //    private static final String EXTRA_PAGE = "extra_page";
     private ArrayList<Fragment> mFragmentList = new ArrayList<>();
-    private GameStartFragment mStartFragment;
+    private StartFragment mStartFragment;
+    private NormalFragment mNormalFragment;
+    private ChallengeFragmet mChallengeFragment;
+    private RankFragmet mRankFragment;
+    private SettingFragmet mSettingFragment;
 //    private GameMainFragment mGameFragment;   //暂时不用
-
 //    private GameResultFragment mResultFragment;// 暂时不用
     private int score;
     public int getScore() {
@@ -41,18 +49,25 @@ public class GameMainActivity extends AppCompatActivity {
 
     private void initPage() {
         mFragmentList.clear();
-        mStartFragment = new GameStartFragment();
+        mStartFragment = new StartFragment();
+        mNormalFragment = new NormalFragment();
+        mChallengeFragment = new ChallengeFragmet();
+        mRankFragment = new RankFragmet();
+        mSettingFragment = new SettingFragmet();
 //        mGameFragment = new GameMainFragment();
 //        mResultFragment = new GameResultFragment();
 
 
         mFragmentList.add(mStartFragment);
+        mFragmentList.add(mNormalFragment);
+        mFragmentList.add(mChallengeFragment);
+        mFragmentList.add(mRankFragment);
+        mFragmentList.add(mSettingFragment);
 //        mFragmentList.add(mGameFragment);
 //        mFragmentList.add(mResultFragment);
     }
 
     public void changePage(int index) {
-
         try {
             Fragment fragment = mFragmentList.get(index);
             if (null != fragment) {
@@ -76,7 +91,6 @@ public class GameMainActivity extends AppCompatActivity {
     public void postScore(int score) {
 
         try {
-
             this.score = score;
             changePage(2);
         } catch (Exception ex) {
@@ -84,12 +98,12 @@ public class GameMainActivity extends AppCompatActivity {
         }
     }
 
-    @Override
-    public boolean onKeyDown(int keyCode, KeyEvent event) {
-        //游戏页屏蔽返回键
-        if (keyCode == KeyEvent.KEYCODE_BACK) {
-            return true;
-        }
-        return super.onKeyDown(keyCode, event);
-    }
+//    @Override
+//    public boolean onKeyDown(int keyCode, KeyEvent event) {
+//        //游戏页屏蔽返回键
+//        if (keyCode == KeyEvent.KEYCODE_BACK) {
+//            return true;
+//        }
+//        return super.onKeyDown(keyCode, event);
+//    }
 }

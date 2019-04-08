@@ -1,4 +1,4 @@
-package com.example.whackamole.game;
+package com.example.whackamole.fragment;
 
 import com.example.whackamole.base.BaseFragment;
 
@@ -6,7 +6,7 @@ import com.example.whackamole.base.BaseFragment;
  * @Author: hu.wentao@outlook.com
  * @Date: 2019/4/7
  */
-public class NormalGameFragmet extends BaseFragment {
+public class RankFragmet extends BaseFragment {
     @Override
     protected void doLoadData() {
 
