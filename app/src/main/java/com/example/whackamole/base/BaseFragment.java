@@ -82,7 +82,7 @@ public abstract class BaseFragment extends Fragment {
             ButterKnife.bind(this, mRootView);
 
             doInit();
-            doLoadData();
+//            doLoadData();
             return mRootView;
         }
         return super.onCreateView(inflater, container, savedInstanceState);
@@ -90,7 +90,7 @@ public abstract class BaseFragment extends Fragment {
 
     protected abstract void doInit();
 
-    protected abstract void doLoadData();
+//    protected abstract void doLoadData();
 
     /**
      * 是否开启加载动画

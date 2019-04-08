@@ -9,10 +9,9 @@ import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import android.view.Window;
 
-import com.example.whackamole.fragment.ChallengeFragmet;
-import com.example.whackamole.fragment.NormalFragment;
-import com.example.whackamole.fragment.RankFragmet;
-import com.example.whackamole.fragment.SettingFragmet;
+import com.example.whackamole.fragment.GameFragment;
+import com.example.whackamole.fragment.RankFragment;
+import com.example.whackamole.fragment.SettingFragment;
 import com.example.whackamole.fragment.StartFragment;
 
 import java.util.ArrayList;
@@ -26,10 +25,9 @@ public class GameMainActivity extends AppCompatActivity {
 //    private static final String EXTRA_PAGE = "extra_page";
     private ArrayList<Fragment> mFragmentList = new ArrayList<>();
     private StartFragment mStartFragment;
-    private NormalFragment mNormalFragment;
-    private ChallengeFragmet mChallengeFragment;
-    private RankFragmet mRankFragment;
-    private SettingFragmet mSettingFragment;
+    private GameFragment mGameFragment;
+    private RankFragment mRankFragment;
+    private SettingFragment mSettingFragment;
 //    private GameMainFragment mGameFragment;   //暂时不用
 //    private GameResultFragment mResultFragment;// 暂时不用
     private int score;
@@ -50,21 +48,14 @@ public class GameMainActivity extends AppCompatActivity {
     private void initPage() {
         mFragmentList.clear();
         mStartFragment = new StartFragment();
-        mNormalFragment = new NormalFragment();
-        mChallengeFragment = new ChallengeFragmet();
-        mRankFragment = new RankFragmet();
-        mSettingFragment = new SettingFragmet();
-//        mGameFragment = new GameMainFragment();
-//        mResultFragment = new GameResultFragment();
-
+        mGameFragment = new GameFragment();
+        mRankFragment = new RankFragment();
+        mSettingFragment = new SettingFragment();
 
         mFragmentList.add(mStartFragment);
-        mFragmentList.add(mNormalFragment);
-        mFragmentList.add(mChallengeFragment);
+        mFragmentList.add(mGameFragment);
         mFragmentList.add(mRankFragment);
         mFragmentList.add(mSettingFragment);
-//        mFragmentList.add(mGameFragment);
-//        mFragmentList.add(mResultFragment);
     }
 
     public void changePage(int index) {

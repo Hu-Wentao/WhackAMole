@@ -12,6 +12,7 @@ public class AppDate {
     private static SharedPreferences preferences;
     //= key
     public static final String SCORE_ARR_STRING = "top3Score";  // 存放前三的分数, 以空格隔开
+    public static final String IS_NORMAL_GAME_MODEL = "currentGameModel"; // 存放当前游戏模式(普通还是挑战)
 
     private static synchronized SharedPreferences getPreferences(Context c){
         if(preferences == null){
@@ -20,13 +21,13 @@ public class AppDate {
         return preferences;
     }
 
-    public static void saveInt(Context c, String key, int val){
+    public static void setInt(Context c, String key, int val){
         getPreferences(c).edit().putInt(key, val).apply();
     }
-    public static void saveString(Context c, String key, String val){
+    public static void setString(Context c, String key, String val){
         getPreferences(c).edit().putString(key, val).apply();
     }
-    public static void saveBoolean(Context c, String key, Boolean val){
+    public static void setBoolean(Context c, String key, Boolean val){
         getPreferences(c).edit().putBoolean(key, val).apply();
     }
 

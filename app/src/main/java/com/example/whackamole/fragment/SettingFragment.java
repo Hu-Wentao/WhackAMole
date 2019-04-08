@@ -1,17 +1,13 @@
 package com.example.whackamole.fragment;
 
+import com.example.whackamole.R;
 import com.example.whackamole.base.BaseFragment;
 
 /**
  * @Author: hu.wentao@outlook.com
  * @Date: 2019/4/7
  */
-public class RankFragmet extends BaseFragment {
-    @Override
-    protected void doLoadData() {
-
-    }
-
+public class SettingFragment extends BaseFragment {
     @Override
     protected void doInit() {
 
@@ -19,6 +15,6 @@ public class RankFragmet extends BaseFragment {
 
     @Override
     protected int getLayoutName() {
-        return 0;
+        return R.layout.fragment_setting;
     }
 }

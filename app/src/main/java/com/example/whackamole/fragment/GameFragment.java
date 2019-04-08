@@ -2,7 +2,6 @@ package com.example.whackamole.fragment;
 
 import android.support.v7.widget.GridLayout;
 import android.widget.ImageView;
-import android.widget.TextView;
 
 import com.example.whackamole.R;
 import com.example.whackamole.base.BaseFragment;
@@ -13,7 +12,7 @@ import java.util.ArrayList;
  * @Author: hu.wentao@outlook.com
  * @Date: 2019/4/7
  */
-public class NormalFragment extends BaseFragment {
+public class GameFragment extends BaseFragment {
     // 老鼠洞 ImageView list
     public static ArrayList<ImageView> mRatHoleList = new ArrayList<>();
 
@@ -24,13 +23,8 @@ public class NormalFragment extends BaseFragment {
     }
 
     @Override
-    protected void doLoadData() {
-
-    }
-
-    @Override
     protected int getLayoutName() {
-        return R.layout.fragment_game_normal;
+        return R.layout.fragment_game_main;
     }
 
     /**
@@ -64,11 +58,6 @@ public class NormalFragment extends BaseFragment {
             layout.addView(iv, layoutParams);
         }
 
-//        for (int i = 0; i < 12; i++) {
-//            TextView tv = new TextView(getContext());
-//            tv.setText("asdf" + i);
-//            layout.addView(tv);
-//        }
     }
 
 }
