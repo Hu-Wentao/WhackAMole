@@ -1,11 +1,12 @@
 package com.example.whackamole.fragment;
 
 import android.graphics.drawable.AnimationDrawable;
+import android.graphics.drawable.Drawable;
 import android.support.v7.widget.GridLayout;
 import android.util.Log;
 import android.util.SparseArray;
-import android.view.KeyEvent;
 import android.view.View;
+import android.view.animation.Animation;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -24,9 +25,12 @@ import butterknife.OnClick;
  */
 public class GameFragment extends BaseFragment implements View.OnClickListener {
     // 老鼠洞 ImageView list
-    public static SparseArray<ImageView> mRateHoleArray = new SparseArray<>(12);
+    private static SparseArray<ImageView> mRateHoleArray = new SparseArray<>(12);
+
+
+
     // 本局游戏得分
-    private static int score;
+    private static int currentScore;
 
     @Override
     public boolean needHandleBackPress() {
@@ -113,16 +117,15 @@ public class GameFragment extends BaseFragment implements View.OnClickListener {
     }
 
     private void startChallengeGame() {
-
+        // todo 考虑与normal合并
     }
 
     private void endGame() {
-        // todo
+        // 显示 下一步 按钮
         findViewById(R.id.constrain_game_result).setVisibility(View.VISIBLE);
-        score = 100;
+        currentScore = 100;
         // 设置分数
-        ((TextView) findViewById(R.id.tv_score)).setText(score + " 分");
-
+        ((TextView) findViewById(R.id.tv_score)).setText(currentScore + " 分");
     }
 
     @Override
@@ -133,7 +136,7 @@ public class GameFragment extends BaseFragment implements View.OnClickListener {
                 // todo
                 break;
             case R.id.btn_next:
-                ((GameMainActivity)getActivity()).changePage(2);
+                ((GameMainActivity) getActivity()).changePage(2);
                 //todo 在AppData 里面写一个操作 分数arr 的方法
                 AppDate.setString(getContext(), AppDate.SCORE_ARR_STRING, "100");   // todo fake data
                 break;
@@ -142,10 +145,7 @@ public class GameFragment extends BaseFragment implements View.OnClickListener {
         }
     }
 
-//    private AnimationDrawable getAnimationDrawable(){
-//        AnimationDrawable animation = new AnimationDrawable();
-//
-//    }
+
 
 
 }

@@ -17,30 +17,13 @@ import butterknife.OnClick;
  */
 public class StartFragment extends BaseFragment implements View.OnClickListener {
 
-    // 绑定View
-//    @BindView(R.id.btn_normal) Button mBtnNormalModel;
-//    @BindView(R.id.btn_challenge) Button mBtnChallengeModel;
-//    @BindView(R.id.btn_rank) Button mBtnRank;
-//    @BindView(R.id.btn_setting) Button mBtnSetting;
-
     @Override
     public boolean needHandleBackPress() {
         return true;
     }
 
     @Override
-    protected void doInit() {
-//        mBtnNormalModel.setSelected(true);
-//        mBtnNormalModel.setOnClickListener(new View.OnClickListener() {
-//            @Override
-//            public void onClick(View v) {
-//                ((GameMainActivity) mContext).changePage(1);
-//            }
-//        });
-
-    }
-
-
+    protected void doInit() {}
 
     @Override
     protected int getLayoutName() {
