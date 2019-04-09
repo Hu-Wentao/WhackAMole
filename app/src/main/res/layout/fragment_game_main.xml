@@ -126,4 +126,4 @@
         app:layout_constraintBaseline_toBaselineOf="@+id/tv_current_score"
         app:layout_constraintEnd_toEndOf="parent" />
 
-</android.support.constraint.ConstraintLayout>
+d</android.support.constraint.ConstraintLayout>

@@ -1,12 +1,11 @@
 package com.example.whackamole.fragment;
 
-import android.graphics.drawable.AnimationDrawable;
-import android.graphics.drawable.Drawable;
+import android.os.Handler;
+import android.os.Message;
 import android.support.v7.widget.GridLayout;
 import android.util.Log;
 import android.util.SparseArray;
 import android.view.View;
-import android.view.animation.Animation;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -25,32 +24,40 @@ import butterknife.OnClick;
  */
 public class GameFragment extends BaseFragment implements View.OnClickListener {
     // 老鼠洞 ImageView list
-    private static SparseArray<ImageView> mRateHoleArray = new SparseArray<>(12);
+    private SparseArray<ImageView> mRateHoleArray = new SparseArray<>(12);
 
 
+    // 当前游戏模式
+    private  boolean isNormalModel;
+    // 游戏是否已开始  -1 未开始, 0 开始, 1 结束
+    private  byte currentGameState = -1;
+    // 当前游戏得分
+    private  int currentScore;
+//    private static int currentReamingTime;
 
-    // 本局游戏得分
-    private static int currentScore;
+    // Handler 的what类型
+    private static final int MSG_GAME_START = 0;
+    private static final int MSG_GAME_REFRESH = 1;
+    private static final int MSG_GAME_INTERVAL = 2;
+    private static final int MSG_GAME_END = 3;
+    private static final int MSG_GAME_ANI_STOP = 4;
 
-    @Override
+    @Override   // 返回事件
     public boolean needHandleBackPress() {
         return false;
     }
 
     @Override
     protected void doInit() {
-        // 动态添加地洞
-        addMiceHole();
+        isNormalModel = AppDate.getBoolean(getContext(), AppDate.IS_NORMAL_GAME_MODEL, true);
+        // 动态添加地洞 // 考虑根据情况同时添加TextView
+        addMiceHole(isNormalModel);
 
-        // 开始游戏
-        if (AppDate.getBoolean(getContext(), AppDate.IS_NORMAL_GAME_MODEL, true)) {
-            startNormalGame();
-        } else {
-            startChallengeGame();
-        }
+//        // 开始游戏
+//        onGameStart(isNormalModel);
 
         // 展示游戏结算页面,
-        endGame();
+//        onGameEnd();    // todo 暂时不显示这个
     }
 
     @Override
@@ -62,21 +69,24 @@ public class GameFragment extends BaseFragment implements View.OnClickListener {
     /**
      * 动态添加地洞, 为 地洞view 配置tag(0 - 11)
      * 使用 mRateHoleArray 存储
+     * //todo 在此处实现成语打地鼠的 TextVIew, 考虑添加 boolean isNormalModel 参数
      */
-    private void addMiceHole() {
+    private void addMiceHole(boolean isNormalModel) {
         GridLayout layout = findViewById(R.id.gridlayout_rat_hole);
+        // todo 考虑同时添加一个 TextView, 并将GridView 换成 8行 3列的
         for (int i = 0; i < 12; i++) {
             ImageView iv = new ImageView(getContext());
             iv.setImageResource(R.drawable.img_rat_public_0);   // 设置默认图片
+            iv.setTag(i);   // 为hole 添加 tag
             // 添加点击事件监听器
             iv.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    holeClick(v);
+                    onHoleClick(v);
                 }
             });
             // 将控件添加到list
-            iv.setTag(i);   // 为hole 添加 tag
+
             mRateHoleArray.append(i, iv);
 
             //使用Spec定义子控件的位置和比重
@@ -104,26 +114,36 @@ public class GameFragment extends BaseFragment implements View.OnClickListener {
     /**
      * 动态添加的 ratHole 的点击事件
      *
-     * @param view 传入的是被点击的RatHole,
+     * @param v 传入的是被点击的RatHole,
      */
-    private void holeClick(View view) {
+    private void onHoleClick(View v) {
         // todo 判断被点击的view 是不是正在播放地鼠动画
+        // 判断是否开始
+        if (currentGameState != 0) {
+            return;
+        }
+        v.getTag();  // 被点击的地洞的序号
+        // 通过 hole的序号获取相应的 控件的指定类型的动画
+
 
     }
 
-    private void startNormalGame() {
-        // todo
+    private void onGameStart(boolean isNormalModel) {
+        // 声明游戏开始
+        currentGameState = 0;
+        // 初始化游戏数据
+        currentScore = 0;
+
+        // todo 1. 启动一个线程, 随机让指定hole播放动画, 并设置该控件tag...
 
     }
 
-    private void startChallengeGame() {
-        // todo 考虑与normal合并
-    }
-
-    private void endGame() {
+    private void onGameEnd() {
+        // 声明游戏结束
+        currentGameState = -1;
         // 显示 下一步 按钮
         findViewById(R.id.constrain_game_result).setVisibility(View.VISIBLE);
-        currentScore = 100;
+        currentScore = 100; // todo fake data
         // 设置分数
         ((TextView) findViewById(R.id.tv_score)).setText(currentScore + " 分");
     }
@@ -133,19 +153,42 @@ public class GameFragment extends BaseFragment implements View.OnClickListener {
     public void onClick(View v) {
         switch (v.getId()) {
             case R.id.iv_pause_play:
-                // todo
+                // todo 游戏暂停 逻辑
                 break;
             case R.id.btn_next:
                 ((GameMainActivity) getActivity()).changePage(2);
                 //todo 在AppData 里面写一个操作 分数arr 的方法
-                AppDate.setString(getContext(), AppDate.SCORE_ARR_STRING, "100");   // todo fake data
+//                AppDate.setString(getContext(), AppDate.SCORE_ARR_STRING, "100");   // todo fake data
                 break;
             default:
                 if (BuildConfig.DEBUG) Log.d("swR+GameFragment", "未处理的点击事件...");
         }
     }
 
+    private Handler mGameHandler = new Handler(new Handler.Callback() {
+        @Override
+        public boolean handleMessage(Message msg) {
+            switch (msg.what) {
+                case MSG_GAME_START:
+                    onGameStart(isNormalModel);
+                    break;
+                case MSG_GAME_REFRESH:
 
+                    break;
+                case MSG_GAME_INTERVAL:
 
+                    break;
+                case MSG_GAME_END:
+                    onGameEnd();
+                    break;
+                case MSG_GAME_ANI_STOP:
+
+                    break;
+                default:
+                    if (BuildConfig.DEBUG) Log.d("swR+GameFragment", "未处理的点击事件...");
+            }
+            return false;
+        }
+    });
 
 }

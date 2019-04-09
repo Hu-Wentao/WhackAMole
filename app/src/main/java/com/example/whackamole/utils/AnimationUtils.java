@@ -3,7 +3,10 @@ package com.example.whackamole.utils;
 import android.content.Context;
 import android.graphics.drawable.AnimationDrawable;
 import android.graphics.drawable.Drawable;
+import android.util.Log;
 import android.util.SparseArray;
+
+import com.example.whackamole.BuildConfig;
 
 /**
  * 获取动画
@@ -41,6 +44,10 @@ public class AnimationUtils {
                     productAnimationByName(c,
                             getPublicAniCache(c, new AnimationDrawable(), aniColor, aniUpOrDown),
                             aniType,aniColor, aniUpOrDown));
+            if(mRatAnimation.size() == 9){  // 当所有的动画都已经生产完毕, 则清空缓存
+                mPublicAniCache.clear();
+            }
+            if (BuildConfig.DEBUG) Log.d("AnimationUtils", "mRatAnimation.size():" + mRatAnimation.size()); //todo 确保它的大小不会超过9, 否则需要修改代码
         }
         return mRatAnimation.get(aniType + aniColor + aniUpOrDown);
     }
