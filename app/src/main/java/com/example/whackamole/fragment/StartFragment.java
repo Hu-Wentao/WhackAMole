@@ -4,7 +4,7 @@ import android.util.Log;
 import android.view.View;
 
 import com.example.whackamole.BuildConfig;
-import com.example.whackamole.GameMainActivity;
+import com.example.whackamole.MainActivity;
 import com.example.whackamole.R;
 import com.example.whackamole.base.BaseFragment;
 import com.example.whackamole.data.AppDate;
@@ -37,17 +37,17 @@ public class StartFragment extends BaseFragment implements View.OnClickListener 
             case R.id.btn_normal:
                 // 设置当前游戏模式
                 AppDate.setBoolean(getContext(), AppDate.IS_NORMAL_GAME_MODEL, true);
-                ((GameMainActivity) mContext).changePage(1);
+                ((MainActivity) mContext).changePage(1);
                 break;
             case R.id.btn_challenge:
                 AppDate.setBoolean(getContext(), AppDate.IS_NORMAL_GAME_MODEL, false);
-                ((GameMainActivity) mContext).changePage(1);
+                ((MainActivity) mContext).changePage(1);
                 break;
             case R.id.btn_rank:
-                ((GameMainActivity) mContext).changePage(2);
+                ((MainActivity) mContext).changePage(2);
                 break;
             case R.id.btn_setting:
-                ((GameMainActivity) mContext).changePage(3);
+                ((MainActivity) mContext).changePage(3);
                 break;
             default:
                 if (BuildConfig.DEBUG) Log.d("swR+StartFragment", "未处理的点击事件...");

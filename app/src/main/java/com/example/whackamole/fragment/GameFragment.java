@@ -11,11 +11,14 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.example.whackamole.BuildConfig;
-import com.example.whackamole.GameMainActivity;
+import com.example.whackamole.MainActivity;
 import com.example.whackamole.R;
 import com.example.whackamole.base.BaseFragment;
 import com.example.whackamole.data.AppDate;
-import com.example.whackamole.utils.AnimationUtils;
+import com.example.whackamole.game.GameThread;
+import com.example.whackamole.utils.AniUtils;
+
+import java.util.HashSet;
 
 import butterknife.OnClick;
 
@@ -27,17 +30,20 @@ import butterknife.OnClick;
 public class GameFragment extends BaseFragment implements View.OnClickListener {
     // 老鼠洞 ImageView list
     private SparseArray<ImageView> mRateHoleArray = new SparseArray<>(12);
-    // 12个洞的 红, 黄, 蓝 老鼠的 伸头, 缩头, 被打动画
-    private AnimationDrawable[][][] mAnimationArr = new AnimationDrawable[12][3][3];
-
+    // 正在播放动画的洞的序号
+    private HashSet<Integer> mPlayingHole = new HashSet<>(12);
     // 当前游戏模式
     private boolean isNormalModel;
-    // 游戏是否已开始  -1 未开始, 0 开始, 1 结束
+    // 当前游戏状态  -1 未开始, 0 开始, 1 结束
     private byte currentGameState = -1;
     // 当前游戏得分
     private int currentScore;
-//    private static int currentReamingTime;
-
+    // 游戏逻辑线程
+    private GameThread mGameThread;
+    // 动画数组       3: 3种颜色的地鼠, 12: 12个洞
+    AnimationDrawable[][] mRatAnimationArr = new AnimationDrawable[3][12];
+    // 被击打动画数组 3: 3种颜色的地鼠, 12: 12个地洞
+    AnimationDrawable[][] mRatHitAnimationArr = new AnimationDrawable[3][12];
     // Handler 的what类型
     public static final int MSG_GAME_START = 0;
     public static final int MSG_GAME_REFRESH = 1;
@@ -45,12 +51,7 @@ public class GameFragment extends BaseFragment implements View.OnClickListener {
     public static final int MSG_GAME_END = 3;
     public static final int MSG_GAME_ANI_STOP = 4;
     // Handler arg1, 游戏剩余时间...
-
-    // Handler arg2, 选择模型类型
-    public static final int
-            MODEL_RED = 0,
-            MODEL_ORANGE = 1,
-            MODEL_BLUE = 2;
+    // Handler arg2, 选择模型类型 -> 参见 AniUtils -> RAT_COLOR_*
 
 
     @Override   // 返回事件
@@ -61,13 +62,16 @@ public class GameFragment extends BaseFragment implements View.OnClickListener {
     @Override
     protected void doInit() {
         isNormalModel = AppDate.getBoolean(getContext(), AppDate.IS_NORMAL_GAME_MODEL, true);
-
-        {   // 不要改动顺序
+        {   // 初始化一些信息 - 不要改动顺序
             // 动态添加地洞 // 考虑根据情况同时添加TextView
             addMiceHole(isNormalModel);
-            // 动态为地洞添加动画 // 没有必要
-            addAnimationToView(mRateHoleArray, isNormalModel);
-
+            // 初始化每个地洞对应的动画
+            initRatAnimation(isNormalModel);
+        }
+        {   // 开始游戏逻辑
+            // onGameGuide() // todo 1. 建立一个游戏指引(游戏开始前倒计时之类)
+            // 倒计时结束, 发送一个Message, 开始游戏
+            mGameHandler.sendEmptyMessage(MSG_GAME_START);
         }
 
     }
@@ -77,21 +81,17 @@ public class GameFragment extends BaseFragment implements View.OnClickListener {
         return R.layout.fragment_game_main;
     }
 
-    private void addAnimationToView(SparseArray<ImageView> holeArray, boolean isNormalModel){
+    private void initRatAnimation(boolean isNormalModel) {
         // 为每个洞添加红地鼠的, 伸头, 缩头, 被打 动画
-        for (int i = 0; i < mAnimationArr.length; i++) {
-            // 12次, 12个洞
-            for (int j = 1; j <= mAnimationArr[i].length; j++) {
-                // 3次 3种颜色的老鼠 红, 黄, 蓝
-                for (int k = 1; k <= mAnimationArr[i][j].length; k++) {
-                    // 3次 3中动画, 伸头, 缩头, 被打
-                    int type = k;
-
-                    //
-                    mAnimationArr[i][j][k] = (AnimationDrawable)AnimationUtils.getAnimationByName(getContext(), j*10, type, k==1);
-                }
+        for (int i = 0; i < mRatAnimationArr.length; i++) {
+            for (int j = 0; j < mRatAnimationArr[i].length; j++) {
+                mRatAnimationArr[i][j] = (AnimationDrawable) AniUtils.getAnimationByName(getContext(), AniUtils.RAT_TYPE_NORMAL, i+1).getConstantState().newDrawable();
             }
-
+        }
+        for (int i = 0; i < mRatHitAnimationArr.length; i++) {
+            for (int j = 0; j < mRatHitAnimationArr[i].length; j++) {
+                mRatAnimationArr[i][j] = (AnimationDrawable) AniUtils.getAnimationByName(getContext(), AniUtils.RAT_TYPE_BEATEN, i+1).getConstantState().newDrawable();
+            }
         }
     }
 
@@ -105,8 +105,10 @@ public class GameFragment extends BaseFragment implements View.OnClickListener {
         // todo 考虑同时添加一个 TextView, 并将GridView 换成 8行 3列的
         for (int i = 0; i < 12; i++) {
             ImageView iv = new ImageView(getContext());
-            iv.setImageResource(R.drawable.img_rat_public_0);   // 设置默认图片 todo 考虑删除
-            iv.setTag(i);   // 为hole 添加 tag
+
+            iv.setBackgroundResource(R.drawable.img_rat_public_0);   // 设置默认图片 todo 考虑删除
+
+            iv.setTag(R.id.hole_id, i);   // 为hole 添加 tag
             // 添加点击事件监听器
             iv.setOnClickListener(new View.OnClickListener() {
                 @Override
@@ -144,36 +146,110 @@ public class GameFragment extends BaseFragment implements View.OnClickListener {
      * @param v 传入的是被点击的RatHole,
      */
     private void onHoleClick(View v) {
-        // todo 判断被点击的view 是不是正在播放地鼠动画
+        final int holeId = (int) v.getTag(R.id.hole_id);
         // 判断是否开始
         if (currentGameState != 0) {
             return;
         }
-        v.getTag();  // 被点击的地洞的序号
-        // 通过 hole的序号获取相应的 控件的指定类型的动画
+        // 播放动画
 
 
+        // 获取该洞的所属的动画
+        AnimationDrawable aniDrawable = mRatAnimationArr[(int) v.getTag(R.id.hole_current_color)][holeId];
+        // todo 可能BUG 没有添加 v被点击的洞的 Tag - HOLE_CURRENT_COLOR
+        // 如果 被点击的洞不在播放动画, 则退出方法 (用户点击了没有播放动画的洞)
+        if (aniDrawable == null || !aniDrawable.isRunning()) {
+            return;
+        }
+        mGameHandler.removeMessages(MSG_GAME_ANI_STOP, aniDrawable);
+        aniDrawable.stop();
+        aniDrawable.selectDrawable(0);  // 将动画设置到第一张(初始状态)
+        // 处理得分情况, //todo 可以在此处同时播放音效
+        switch ((int) v.getTag(R.id.hole_current_color)) {
+            case AniUtils.RAT_COLOR_RED:
+                currentScore += 10;
+                break;
+            case AniUtils.RAT_COLOR_ORANGE:
+                currentScore += 20;
+                break;
+            case AniUtils.RAT_COLOR_BLUE:
+                currentScore -= 15;
+                break;
+        }
+        // 处理动画的播放 和在 HashSet mPlayingHole 中标记正在播放动画的洞
+        final ImageView view = mRateHoleArray.get(holeId);
+        mPlayingHole.add(holeId);
+        view.postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                view.setBackgroundResource(R.drawable.img_rat_public_0);
+                mPlayingHole.remove(holeId);
+            }
+        }, 1000);
     }
 
     private void onGameStart(boolean isNormalModel) {
         // 声明游戏开始
-        currentGameState = 0;
+        currentGameState = 0;   // 0 : 游戏运行中
         // 初始化游戏数据
         currentScore = 0;
 
-        // todo 1. 启动一个线程, 随机让指定hole播放动画, 并设置该控件tag...
+        // 开启线程
+        mGameThread = new GameThread(getContext(), mGameHandler, mPlayingHole);
+        mGameThread.setAnimationArr(mRatAnimationArr);
 
+        // 开启线轮询
+        mGameThread.start();
+        mGameThread.startGame();
     }
 
-    private void onGameEnd() {
-        // 声明游戏结束
-        currentGameState = -1;
+    private void onGameRefresh(int hole, int aniColor) {
+        // 要播放的动画
+        AnimationDrawable targetAniDrawable = mRatAnimationArr[aniColor][hole];
+        // 获取该洞的view
+        ImageView view = mRateHoleArray.get(hole);
+        // 清空背景,并设置动画
+        view.setBackgroundResource(0);
+        view.setBackground(targetAniDrawable);
+        // 设置tag, 标记这个view播放的动画的颜色
+        view.setTag(R.id.hole_current_color, aniColor);
+
+        // 设置AnimationDrawable可见性, 然后播放动画
+        //todo 设置 restart 为 true, 在成语模式下, 应该会 保证游戏运行正常.....
+        targetAniDrawable.setVisible(true, true);
+        targetAniDrawable.start();
+
+
+        // 获取该动画的播放时长
+        int duration = 0;
+        for (int i = 0; i < targetAniDrawable.getNumberOfFrames(); i++) {
+            duration += targetAniDrawable.getDuration(i);
+        }
+
+        // 发送一个消息, 表示该动画的播放时长, 设置在动画时长结束后,停止播放动画
+        Message obtain = Message.obtain();
+        obtain.what = MSG_GAME_ANI_STOP;
+        obtain.arg1 = hole;
+        obtain.arg2 = aniColor;
+        obtain.obj = targetAniDrawable;
+        mGameHandler.sendMessageDelayed(obtain, duration);
+    }
+
+    private void onGameOver() {
         // 显示 下一步 按钮
         findViewById(R.id.constrain_game_result).setVisibility(View.VISIBLE);
         currentScore = 100; // todo fake data
         // 设置分数
-        ((TextView) findViewById(R.id.tv_score)).setText(currentScore + " 分");
+        ((TextView) findViewById(R.id.tv_pause_play)).setText(currentScore + " 分");
+        // 执行游戏结束
+        mGameThread.stopGame();
+        // 声明游戏结束
+        currentGameState = 1;
+        // 发送游戏分数   // todo
+
+
     }
+
 
     @Override
     @OnClick({R.id.iv_pause_play, R.id.btn_next})
@@ -183,7 +259,8 @@ public class GameFragment extends BaseFragment implements View.OnClickListener {
                 // todo 游戏暂停 逻辑
                 break;
             case R.id.btn_next:
-                ((GameMainActivity) getActivity()).changePage(2);
+                // 前往排行榜
+                ((MainActivity) getActivity()).changePage(2);
                 //todo 在AppData 里面写一个操作 分数arr 的方法
 //                AppDate.setString(getContext(), AppDate.SCORE_ARR_STRING, "100");   // todo fake data
                 break;
@@ -200,13 +277,17 @@ public class GameFragment extends BaseFragment implements View.OnClickListener {
                     onGameStart(isNormalModel);
                     break;
                 case MSG_GAME_REFRESH:
-
+                    // 刷新洞, 产生随机数(地洞序号)和要播放的model(什么颜色的老鼠)后,进行操作
+                    // arg1: 洞序号, arg2: 洞里 地鼠的颜色
+                    onGameRefresh(msg.arg1, msg.arg2);
                     break;
                 case MSG_GAME_INTERVAL:
-
+                    // 更新当前分数, 更新剩余时间
+                    ((TextView)findViewById(R.id.tv_count_down)).setText(String.valueOf(msg.arg1) + "秒");
+                    ((TextView)findViewById(R.id.tv_current_score)).setText(String.valueOf(currentScore));  // todo 分数的获取方式...
                     break;
                 case MSG_GAME_END:
-                    onGameEnd();
+                    onGameOver();
                     break;
                 case MSG_GAME_ANI_STOP:
 

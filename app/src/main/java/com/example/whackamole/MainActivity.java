@@ -23,7 +23,7 @@ import java.util.ArrayList;
  * Created by magical.zhang on 2018/5/21.
  * Description : 兴趣标签、（游戏主体、打招呼）
  */
-public class GameMainActivity extends AppCompatActivity implements BackHandledInterface {
+public class MainActivity extends AppCompatActivity implements BackHandledInterface {
 
     private StartFragment mStartFragment;
     private GameFragment mGameFragment;
