@@ -36,7 +36,7 @@ public class AnimationUtils {
      * @param isUp 老鼠向上还是向下
      * @return 动画
      */
-    public static AnimationDrawable getAnimationByName(Context c, int aniType, int aniColor, boolean isUp) {
+    public static Drawable getAnimationByName(Context c, int aniColor, int aniType,  boolean isUp) {
         int aniUpOrDown = isUp?1:2;
         if (mRatAnimation.get(aniType + aniColor + aniUpOrDown) == null) {
             // 开始产生需要的动画
@@ -49,7 +49,7 @@ public class AnimationUtils {
             }
             if (BuildConfig.DEBUG) Log.d("AnimationUtils", "mRatAnimation.size():" + mRatAnimation.size()); //todo 确保它的大小不会超过9, 否则需要修改代码
         }
-        return mRatAnimation.get(aniType + aniColor + aniUpOrDown);
+        return mRatAnimation.get(aniType + aniColor + aniUpOrDown).getConstantState().newDrawable();
     }
 
     private static AnimationDrawable getPublicAniCache(Context c, AnimationDrawable oldAniDrawable, int aniColor, int aniUpOrDown){

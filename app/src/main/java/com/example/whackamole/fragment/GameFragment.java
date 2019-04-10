@@ -1,5 +1,6 @@
 package com.example.whackamole.fragment;
 
+import android.graphics.drawable.AnimationDrawable;
 import android.os.Handler;
 import android.os.Message;
 import android.support.v7.widget.GridLayout;
@@ -14,6 +15,7 @@ import com.example.whackamole.GameMainActivity;
 import com.example.whackamole.R;
 import com.example.whackamole.base.BaseFragment;
 import com.example.whackamole.data.AppDate;
+import com.example.whackamole.utils.AnimationUtils;
 
 import butterknife.OnClick;
 
@@ -25,22 +27,31 @@ import butterknife.OnClick;
 public class GameFragment extends BaseFragment implements View.OnClickListener {
     // 老鼠洞 ImageView list
     private SparseArray<ImageView> mRateHoleArray = new SparseArray<>(12);
-
+    // 12个洞的 红, 黄, 蓝 老鼠的 伸头, 缩头, 被打动画
+    private AnimationDrawable[][][] mAnimationArr = new AnimationDrawable[12][3][3];
 
     // 当前游戏模式
-    private  boolean isNormalModel;
+    private boolean isNormalModel;
     // 游戏是否已开始  -1 未开始, 0 开始, 1 结束
-    private  byte currentGameState = -1;
+    private byte currentGameState = -1;
     // 当前游戏得分
-    private  int currentScore;
+    private int currentScore;
 //    private static int currentReamingTime;
 
     // Handler 的what类型
-    private static final int MSG_GAME_START = 0;
-    private static final int MSG_GAME_REFRESH = 1;
-    private static final int MSG_GAME_INTERVAL = 2;
-    private static final int MSG_GAME_END = 3;
-    private static final int MSG_GAME_ANI_STOP = 4;
+    public static final int MSG_GAME_START = 0;
+    public static final int MSG_GAME_REFRESH = 1;
+    public static final int MSG_GAME_INTERVAL = 2;
+    public static final int MSG_GAME_END = 3;
+    public static final int MSG_GAME_ANI_STOP = 4;
+    // Handler arg1, 游戏剩余时间...
+
+    // Handler arg2, 选择模型类型
+    public static final int
+            MODEL_RED = 0,
+            MODEL_ORANGE = 1,
+            MODEL_BLUE = 2;
+
 
     @Override   // 返回事件
     public boolean needHandleBackPress() {
@@ -50,14 +61,15 @@ public class GameFragment extends BaseFragment implements View.OnClickListener {
     @Override
     protected void doInit() {
         isNormalModel = AppDate.getBoolean(getContext(), AppDate.IS_NORMAL_GAME_MODEL, true);
-        // 动态添加地洞 // 考虑根据情况同时添加TextView
-        addMiceHole(isNormalModel);
 
-//        // 开始游戏
-//        onGameStart(isNormalModel);
+        {   // 不要改动顺序
+            // 动态添加地洞 // 考虑根据情况同时添加TextView
+            addMiceHole(isNormalModel);
+            // 动态为地洞添加动画 // 没有必要
+            addAnimationToView(mRateHoleArray, isNormalModel);
 
-        // 展示游戏结算页面,
-//        onGameEnd();    // todo 暂时不显示这个
+        }
+
     }
 
     @Override
@@ -65,6 +77,23 @@ public class GameFragment extends BaseFragment implements View.OnClickListener {
         return R.layout.fragment_game_main;
     }
 
+    private void addAnimationToView(SparseArray<ImageView> holeArray, boolean isNormalModel){
+        // 为每个洞添加红地鼠的, 伸头, 缩头, 被打 动画
+        for (int i = 0; i < mAnimationArr.length; i++) {
+            // 12次, 12个洞
+            for (int j = 1; j <= mAnimationArr[i].length; j++) {
+                // 3次 3种颜色的老鼠 红, 黄, 蓝
+                for (int k = 1; k <= mAnimationArr[i][j].length; k++) {
+                    // 3次 3中动画, 伸头, 缩头, 被打
+                    int type = k;
+
+                    //
+                    mAnimationArr[i][j][k] = (AnimationDrawable)AnimationUtils.getAnimationByName(getContext(), j*10, type, k==1);
+                }
+            }
+
+        }
+    }
 
     /**
      * 动态添加地洞, 为 地洞view 配置tag(0 - 11)
@@ -76,7 +105,7 @@ public class GameFragment extends BaseFragment implements View.OnClickListener {
         // todo 考虑同时添加一个 TextView, 并将GridView 换成 8行 3列的
         for (int i = 0; i < 12; i++) {
             ImageView iv = new ImageView(getContext());
-            iv.setImageResource(R.drawable.img_rat_public_0);   // 设置默认图片
+            iv.setImageResource(R.drawable.img_rat_public_0);   // 设置默认图片 todo 考虑删除
             iv.setTag(i);   // 为hole 添加 tag
             // 添加点击事件监听器
             iv.setOnClickListener(new View.OnClickListener() {
@@ -86,7 +115,6 @@ public class GameFragment extends BaseFragment implements View.OnClickListener {
                 }
             });
             // 将控件添加到list
-
             mRateHoleArray.append(i, iv);
 
             //使用Spec定义子控件的位置和比重
@@ -108,7 +136,6 @@ public class GameFragment extends BaseFragment implements View.OnClickListener {
             // 将控件添加到GridView
             layout.addView(iv, layoutParams);
         }
-
     }
 
     /**
