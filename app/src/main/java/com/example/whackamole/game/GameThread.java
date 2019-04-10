@@ -98,7 +98,7 @@ public class GameThread extends Thread {
      * 检测不符合要求就递归 !! 会导致栈溢出
      */
     private int randomHole() {
-        int turnUp ;
+        int turnUp;
         boolean isPlaying, isKeep;
         do {
             if (mKeepSet.size() == 12) {  // todo 发现问题....
@@ -115,18 +115,19 @@ public class GameThread extends Thread {
             //  随机出来的数  turnUp;
             isPlaying = checkPlayingHole(turnUp);
             isKeep = mKeepSet.contains(turnUp);
-        }while (isPlaying || isKeep);
+        } while (isPlaying || isKeep);
         return turnUp;
     }
 
     /**
      * 检查洞是否有动画在播放
+     *
      * @param turnUp 洞ID
      * @return 是否有动画播放
      */
     private boolean checkPlayingHole(int turnUp) {
         for (AnimationDrawable[] animationDrawables : mRatAnimationArr) {
-            if(animationDrawables[turnUp].isRunning()){
+            if (animationDrawables[turnUp].isRunning()) {
                 return true;
             }
         }
@@ -182,7 +183,8 @@ public class GameThread extends Thread {
     private Random gameRandom;      // 随机数
     private HashSet<Integer> mKeepSet;  // 存放的是地洞序号,...
     private AnimationDrawable[][] mRatAnimationArr;
-    public void setAnimationArr(AnimationDrawable[][] AnimationArr){
+
+    public void setAnimationArr(AnimationDrawable[][] AnimationArr) {
         mRatAnimationArr = AnimationArr;
     }
 
@@ -194,4 +196,6 @@ public class GameThread extends Thread {
 
     private int speedControl;   // 控制游戏节奏
     private int bgIndex;
+
+
 }

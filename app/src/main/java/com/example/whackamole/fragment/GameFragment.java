@@ -73,14 +73,12 @@ public class GameFragment extends BaseFragment implements View.OnClickListener {
             // 倒计时结束, 发送一个Message, 开始游戏
             mGameHandler.sendEmptyMessage(MSG_GAME_START);
         }
-
     }
 
     @Override
     protected int getLayoutName() {
         return R.layout.fragment_game_main;
     }
-
     private void initRatAnimation(boolean isNormalModel) {
         // 为每个洞添加红地鼠的, 伸头, 缩头, 被打 动画
         for (int i = 0; i < mRatAnimationArr.length; i++) {
@@ -146,11 +144,11 @@ public class GameFragment extends BaseFragment implements View.OnClickListener {
      * @param v 传入的是被点击的RatHole,
      */
     private void onHoleClick(View v) {
-        final int holeId = (int) v.getTag(R.id.hole_id);
         // 判断是否开始
         if (currentGameState != 0) {
             return;
         }
+        final int holeId = (int) v.getTag(R.id.hole_id);
         // 播放动画
 
 
@@ -177,15 +175,16 @@ public class GameFragment extends BaseFragment implements View.OnClickListener {
                 break;
         }
         // 处理动画的播放 和在 HashSet mPlayingHole 中标记正在播放动画的洞
-        final ImageView view = mRateHoleArray.get(holeId);
         mPlayingHole.add(holeId);
-        view.postDelayed(new Runnable() {
-            @Override
-            public void run() {
-                view.setBackgroundResource(R.drawable.img_rat_public_0);
-                mPlayingHole.remove(holeId);
-            }
-        }, 1000);
+        // 暂时注释掉以下代码, 以下代码可能会产生栈溢出
+//        final ImageView view = mRateHoleArray.get(holeId);
+//        view.postDelayed(new Runnable() {
+//            @Override
+//            public void run() {
+//                view.setBackgroundResource(R.drawable.img_rat_public_0);
+//                mPlayingHole.remove(holeId);
+//            }
+//        }, 1000);
     }
 
     private void onGameStart(boolean isNormalModel) {
@@ -236,18 +235,17 @@ public class GameFragment extends BaseFragment implements View.OnClickListener {
     }
 
     private void onGameOver() {
-        // 显示 下一步 按钮
+        // 显示 下一步 面板
         findViewById(R.id.constrain_game_result).setVisibility(View.VISIBLE);
-        currentScore = 100; // todo fake data
-        // 设置分数
-        ((TextView) findViewById(R.id.tv_pause_play)).setText(currentScore + " 分");
+        // 隐藏 右上角的 分数
+        findViewById(R.id.textView5).setVisibility(View.INVISIBLE);
+        findViewById(R.id.tv_current_score).setVisibility(View.INVISIBLE);
+        // 设置面板上的 分数
+        ((TextView) findViewById(R.id.tv_show_score)).setText(currentScore + " 分");
         // 执行游戏结束
         mGameThread.stopGame();
         // 声明游戏结束
         currentGameState = 1;
-        // 发送游戏分数   // todo
-
-
     }
 
 
@@ -259,7 +257,8 @@ public class GameFragment extends BaseFragment implements View.OnClickListener {
                 // todo 游戏暂停 逻辑
                 break;
             case R.id.btn_next:
-                // 前往排行榜
+                // 销毁当前Fragment, 前往排行榜
+                GameFragment.this.onDestroy();
                 ((MainActivity) getActivity()).changePage(2);
                 //todo 在AppData 里面写一个操作 分数arr 的方法
 //                AppDate.setString(getContext(), AppDate.SCORE_ARR_STRING, "100");   // todo fake data
@@ -283,6 +282,7 @@ public class GameFragment extends BaseFragment implements View.OnClickListener {
                     break;
                 case MSG_GAME_INTERVAL:
                     // 更新当前分数, 更新剩余时间
+                    // arg1 : 剩余秒数, arg2: 无意义
                     ((TextView)findViewById(R.id.tv_count_down)).setText(String.valueOf(msg.arg1) + "秒");
                     ((TextView)findViewById(R.id.tv_current_score)).setText(String.valueOf(currentScore));  // todo 分数的获取方式...
                     break;
@@ -299,4 +299,14 @@ public class GameFragment extends BaseFragment implements View.OnClickListener {
         }
     });
 
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+
+        if (mGameThread!= null) {
+            mGameThread.release();
+        }
+        mGameHandler.removeCallbacksAndMessages(null);
+    }
 }

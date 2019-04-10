@@ -30,7 +30,6 @@ public class MainActivity extends AppCompatActivity implements BackHandledInterf
     private RankFragment mRankFragment;
     private SettingFragment mSettingFragment;
     private ArrayList<Fragment> mFragmentList = new ArrayList<>();
-
     private BaseFragment mBackHandleFragment;
 
     private long canQuitActivity;    // 实现两次返回键退出应用的功能
@@ -53,6 +52,7 @@ public class MainActivity extends AppCompatActivity implements BackHandledInterf
         mFragmentList.clear();
         mStartFragment = new StartFragment();
         mGameFragment = new GameFragment();
+//        mGameFragment = null;
         mRankFragment = new RankFragment();
         mSettingFragment = new SettingFragment();
 
@@ -78,21 +78,6 @@ public class MainActivity extends AppCompatActivity implements BackHandledInterf
         }
     }
 
-    /**
-     * 告知游戏分数
-     *
-     * @param score 分数
-     */
-    public void postScore(int score) {
-
-        try {
-            this.score = score;
-            changePage(2);
-        } catch (Exception ex) {
-            ex.printStackTrace();
-        }
-    }
-
     @Override
     public void setCurrentTopFragment(BaseFragment topFragment) {
         mBackHandleFragment = topFragment;
@@ -100,7 +85,6 @@ public class MainActivity extends AppCompatActivity implements BackHandledInterf
 
     @Override
     public void onBackPressed() {
-//        if(mBackHandleFragment == null || !mBackHandleFragment.needHandleBackPress()){
         if(mBackHandleFragment.needHandleBackPress()){
             canQuitActivity = System.currentTimeMillis();
             changePage(0);
