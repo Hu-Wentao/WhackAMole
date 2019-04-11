@@ -2,68 +2,81 @@ package com.example.whackamole.fragment;
 
 import android.util.Log;
 import android.view.View;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.example.whackamole.BuildConfig;
 import com.example.whackamole.R;
 import com.example.whackamole.base.BaseFragment;
-import com.example.whackamole.data.AppDate;
+import com.example.whackamole.data.Score;
 
 import java.util.Arrays;
+
+import butterknife.BindView;
+
 
 /**
  * @Author: hu.wentao@outlook.com
  * @Date: 2019/4/7
  */
 public class RankFragment extends BaseFragment {
+    @BindView(R.id.linear_rank) LinearLayout layoutRank;
+    @BindView(R.id.linear_left) LinearLayout layoutLeft;
+    @BindView(R.id.linear_right)LinearLayout layoutRight;
+
     @Override
     public boolean needHandleBackPress() {
         return true;    // 如果处理返回事件, 则返回true
     }
 
-    @Override
-    protected void doInit() {
-        // 查询AppDate, defaultVal 必须为 " " 才能正确的显示结果
-        String[] scoreArr = AppDate.getString(getContext(), AppDate.SCORE_ARR_STRING, " ").split(" ");
 
+    @Override
+    public void onStart() {
+        super.onStart();
+
+    }
+    public void onResume() {
+        super.onResume();
+        int[] scoreArr = Score.getScoreArr(getContext());
         if(scoreArr.length == 0){
-            setVisibilityScoreTips(true);
+            setRankVisibility(false);
         }else{
-            setVisibilityScoreTips(false);
-            Arrays.sort(scoreArr);
+            setRankVisibility(true);
+            layoutLeft.removeAllViews();
+            layoutRight.removeAllViews();
+
+            String[] s = "一二三".split("");
+            for (int i = 0; i < scoreArr.length && i<3; i++) {
+                TextView tvLeft = new TextView(getContext());
+                tvLeft.setTextSize(28);
+                tvLeft.setTextColor(getResources().getColor(R.color.c1));
+                tvLeft.setText( ("第"+s[i+1]+"名") );
+                tvLeft.setTextAlignment(View.TEXT_ALIGNMENT_CENTER);
+                layoutLeft.addView(tvLeft);
+            }
             for (int i = scoreArr.length - 1; i >= 0; i--) {
-                switch (scoreArr.length-1 -i) {
-                    case 0:
-                        findViewById(R.id.tvScore_1).setVisibility(View.VISIBLE);
-                        findViewById(R.id.tvShow1).setVisibility(View.VISIBLE);
-                        ((TextView)findViewById(R.id.tvScore_1)).setText(scoreArr[i]);
-                        break;
-                    case 1:
-                        findViewById(R.id.tvScore_2).setVisibility(View.VISIBLE);
-                        findViewById(R.id.tvShow2).setVisibility(View.VISIBLE);
-                        ((TextView)findViewById(R.id.tvScore_2)).setText(scoreArr[i]);
-                        break;
-                    case 2:
-                        findViewById(R.id.tvScore_3).setVisibility(View.VISIBLE);
-                        findViewById(R.id.tvShow3).setVisibility(View.VISIBLE);
-                        ((TextView)findViewById(R.id.tvScore_3)).setText(scoreArr[i]);
-                        break;
-                    default:
-                        if (BuildConfig.DEBUG) Log.d("swR+RankFragment", "未处理的点击事件...");
-                }
+                TextView tvRight = new TextView(getContext());
+                tvRight.setTextSize(28);
+                tvRight.setTextColor(getResources().getColor(R.color.c1));
+                tvRight.setText(String.valueOf(scoreArr[i]));
+                tvRight.setTextAlignment(View.TEXT_ALIGNMENT_CENTER);
+
+                layoutRight.addView(tvRight);
             }
         }
     }
 
-    /**
-     * 设置是否显示分数的 textView
-     * @param show
-     */
-    private void setVisibilityScoreTips(boolean show){
-        if (show){
-            findViewById(R.id.tvTips).setVisibility(View.VISIBLE);
-        }else {
+    @Override
+    protected void doInit() {
+    }
+
+    private void setRankVisibility(boolean showRank){
+        if (showRank){
+            layoutRank.setVisibility(View.VISIBLE);
             findViewById(R.id.tvTips).setVisibility(View.INVISIBLE);
+        }else {
+            layoutRank.setVisibility(View.INVISIBLE);
+            findViewById(R.id.tvTips).setVisibility(View.VISIBLE);
         }
     }
 

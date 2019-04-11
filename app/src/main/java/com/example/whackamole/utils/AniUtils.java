@@ -3,10 +3,8 @@ package com.example.whackamole.utils;
 import android.content.Context;
 import android.graphics.drawable.AnimationDrawable;
 import android.graphics.drawable.Drawable;
-import android.util.Log;
 import android.util.SparseArray;
 
-import com.example.whackamole.BuildConfig;
 
 /**
  * 获取动画
@@ -18,23 +16,32 @@ public class AniUtils {
     // 动画存储, key 的值通过: RAT_TYPE_ * 10 + RAT_COLOR_ 得到
     private static SparseArray<AnimationDrawable> mRatAnimation = new SparseArray<>(6);
     // 公共动画部分的缓存, KEY 通过:
-    private static SparseArray<AnimationDrawable> mPublicAniCache = new SparseArray<>(6);
+    private static SparseArray<AnimationDrawable> mPublicAniArr = new SparseArray<>(6);
     // getAnimationByName的参数, 不要改变数值的大小! 个位会存储老鼠动画是向上还是向下
-    private static final int RAT_TYPE_PUBLIC = 10;
-
+    private static final int RAT_TYPE_PUBLIC = 10;  // 不要改变参数值, TYPE 参数值关联 getAniTime(), 等方法
     public static final int RAT_TYPE_NORMAL = 20;
     public static final int RAT_TYPE_BEATEN = 30;
 
-    public static final int RAT_COLOR_RED = 1;
-    public static final int RAT_COLOR_ORANGE = 2;
-    public static final int RAT_COLOR_BLUE = 3;
+    public static final int RAT_COLOR_RED = 0;
+    public static final int RAT_COLOR_ORANGE = 1;
+    public static final int RAT_COLOR_BLUE = 2;
 
+    // 动画的播放时长: Normal 和 Beaten
+    private static int[] aniTime = new int[2];
 
-    // type+color type是两位数, color是一位数
-//    public static Drawable getAnimationByName(Context c, int typeAddColor){
-    public static AnimationDrawable getAnimationByName(Context c, int typeAddColor){
-        return getAnimationByName(c, (typeAddColor/10)*10, typeAddColor%10);
+    public static long getAniTime(boolean isBeaten) {
+        int index = isBeaten ? 1 : 0;   // 此处是 -2, Normal为0, beaten为
+        if (aniTime[index] == 0) {
+            AnimationDrawable drawable = getAnimationByName(null, isBeaten ? RAT_TYPE_BEATEN : RAT_TYPE_NORMAL, 1);
+            int t = 0;
+            for (int i = 0; i < drawable.getNumberOfFrames(); i++) {
+                t += drawable.getDuration(i);
+            }
+            aniTime[index] = t;
+        }
+        return aniTime[index];
     }
+
     /**
      * 获取指定类型的动画
      *
@@ -46,40 +53,40 @@ public class AniUtils {
 //    public static Drawable getAnimationByName(Context c, int aniType, int aniColor) {
     public static AnimationDrawable getAnimationByName(Context c, int aniType, int aniColor) {
         if (mRatAnimation.get(aniType + aniColor) == null) {
-            // 开始产生需要的动画
-            mRatAnimation.put(aniType + aniColor,
-                    productAnimationByName(c,   // 加上 公共down 动画
-                            productAnimationByName(c,   // 加上 老鼠down 动画
-                                    productAnimationByName(c,   // 在公共up 动画基础上加上老鼠up 动画
-                                            getPublicAniCache(c, new AnimationDrawable(), aniColor, 1), // 一个向上的 颜色为aniColor的公共动画
-                                            aniType, aniColor, 1)
-                                    , aniType,
-                                    aniColor,
-                                    2
-                            ),
-                            RAT_TYPE_PUBLIC,
-                            aniColor,
-                            2
-                    )
+            // 判断是什么Type
+            mRatAnimation.put(aniType + aniColor,    // 开始产生需要的动画
+                    (aniType == RAT_TYPE_NORMAL) ?  // 根据类型进行拼装
+                            productAnimationByName(c,      // 加上 公共down 动画
+                                    RAT_TYPE_PUBLIC, aniColor, 2,
+                                    productAnimationByName(c,  // 加上 老鼠down 动画
+                                            aniType, aniColor, 2,
+                                            productAnimationByName(c,  // 在公共up 动画基础上加上老鼠up 动画
+                                                    aniType, aniColor, 1,
+                                                    prodPubAnimation(c, aniColor, 1, new AnimationDrawable())// 一个向上的 颜色为aniColor的公共动画
+                                            )
+                                    )
+                            )
+                            :
+                            (AnimationDrawable) c.getDrawable(c.getResources().getIdentifier("img_rat_beaten_" + switchAniColor(aniColor), "drawable", c.getPackageName()))
+
+
             );
             if (mRatAnimation.size() == 9) {  // 当所有的动画都已经生产完毕, 则清空缓存
-                mPublicAniCache.clear();    // todo 如果没问题的话,可以让其等于 null, 让gc回收资源
+                mPublicAniArr.clear();    // todo 如果没问题的话,可以让其等于 null, 让gc回收资源
             }
-            if (BuildConfig.DEBUG)
-                Log.d("AniUtils", "mRatAnimation.size():" + mRatAnimation.size()); //todo 确保它的大小不会超过9, 否则需要修改代码
+//            System.err.println("mRatAnimation.size():" + mRatAnimation.size()); //todo 确保它的大小不会超过9, 否则需要修改代码
         }
-
-//        return mRatAnimation.get(aniType + aniColor).getConstantState().newDrawable(); // todo 每次都复制, 可能带来性能问题
         return mRatAnimation.get(aniType + aniColor);
     }
 
-    private static AnimationDrawable getPublicAniCache(Context c, AnimationDrawable oldAniDrawable, int aniColor, int aniUpOrDown) {
-        if (mPublicAniCache.get(aniColor + aniUpOrDown) == null) {
+
+    private static AnimationDrawable prodPubAnimation(Context c, int aniColor, int aniUpOrDown, AnimationDrawable oldAniDrawable) {
+        if (mPublicAniArr.get(aniColor + aniUpOrDown) == null) {
             if (oldAniDrawable == null)
                 oldAniDrawable = new AnimationDrawable();
-            mPublicAniCache.put(aniColor + aniUpOrDown, productAnimationByName(c, oldAniDrawable, RAT_TYPE_PUBLIC, aniColor, aniUpOrDown));
+            mPublicAniArr.put(aniColor + aniUpOrDown, productAnimationByName(c, RAT_TYPE_PUBLIC, aniColor, aniUpOrDown, oldAniDrawable));
         }
-        return mPublicAniCache.get(aniColor + aniUpOrDown);
+        return mPublicAniArr.get(aniColor + aniUpOrDown);
     }
 
     /**
@@ -92,36 +99,34 @@ public class AniUtils {
      * @param aniUpOrDown    动画中的老鼠是向上的, 还是向下的
      * @return 动画
      */
-    private static AnimationDrawable productAnimationByName(Context c, AnimationDrawable oldAniDrawable, int aniType, int aniColor, int aniUpOrDown) {
+    private static AnimationDrawable productAnimationByName(Context c, int aniType, int aniColor, int aniUpOrDown, AnimationDrawable oldAniDrawable) {
         String param = "";
         int picNum = 6; // 默认6张图
         boolean isUp = aniUpOrDown == 1;
         switch (aniType) {
             case RAT_TYPE_PUBLIC:
-                param = "public_";
+                param = "public";
                 picNum = 3;
                 break;
             case RAT_TYPE_NORMAL:
-                param = "normal_";
+                param = "normal";
                 break;
             case RAT_TYPE_BEATEN:
-                param = "beaten_";
+                param = "beaten";
                 break;
         }
-        param += switchAniColor(aniColor);
-
-        return getRatAnimation(c, oldAniDrawable, param, picNum, isUp);
+        return getRatAnimation(c, oldAniDrawable, param, switchAniColor(aniColor), picNum, isUp);
     }
 
     // 添加颜色参数
     private static String switchAniColor(int aniColor) {
         switch (aniColor) {
             case RAT_COLOR_RED:
-                return "red_";
+                return "red";
             case RAT_COLOR_ORANGE:
-                return "orange_";
+                return "orange";
             case RAT_COLOR_BLUE:
-                return "blue_";
+                return "blue";
             default:
                 return "";
         }
@@ -130,30 +135,44 @@ public class AniUtils {
     /**
      * @param c                  上下文
      * @param oldAniDrawable     原有的动画(可以填 new AnimationDrawable() )
-     * @param param              动画名中的 类型_颜色
+     *                           //     * @param param              动画名中的 类型_颜色
      * @param picNum             图片张数
      * @param isPositiveSequence 帧动画的帧序号是从小到大, 还是从大到小
      * @return 动画
      */
-    private static AnimationDrawable getRatAnimation(Context c, AnimationDrawable oldAniDrawable, String param, int picNum, boolean isPositiveSequence) {
+    private static AnimationDrawable getRatAnimation(Context c, AnimationDrawable oldAniDrawable, String aniType, String aniColor, int picNum, boolean isPositiveSequence) {
         for (int i = 0; i < picNum; i++) { // 图片资源序号从1开始到picNum
+            System.out.println("img_rat_" + aniType + "_" + aniColor + "_" + ((isPositiveSequence ? i + 1 : picNum - i)));//todo
             Drawable drawable =
-                    c.getDrawable(
-                            c.getResources()
-                                    .getIdentifier(
-                                            "img_rat_" + param + ((isPositiveSequence ? i+1 : picNum - i))
-                                            , "drawable", c.getPackageName()
-                                    )
+                    c.getDrawable(c.getResources().getIdentifier(
+                            "img_rat_" + aniType + "_" + aniColor + "_" + ((isPositiveSequence ? i + 1 : picNum - i))
+                            , "drawable"
+                            , c.getPackageName()
+                            )
                     );
             if (drawable == null) {         // 如果picNum == 6, 而实际上只有3张图, 则在i==4 时, 会跳出循环
                 return oldAniDrawable;
             }
             //--------------------------------------------------------------------------------------
-            int duration = 60;
-            if(i == 5)  // 表示, 如果当前帧以 6 结尾, 则修改该帧间隔
-               duration = 1000;
-            oldAniDrawable.addFrame(drawable, duration);  // 帧间隔
+
+            oldAniDrawable.addFrame(drawable,
+                    setDuration(i, isPositiveSequence, aniType));  // 帧间隔
         }
         return oldAniDrawable;
+    }
+
+    //配置动画帧间隔
+    private static int setDuration(int loopIndex, boolean isPositiveSequence, String aniType) {
+        // 默认间隔
+        int duration = 40;
+
+        // 如果是 被击败 的动画, 则间隔增加两倍
+        if ("beaten".equals(aniType) || ("public").equals(aniType) && !isPositiveSequence) {
+            duration *= 1.5;
+        } else {
+            if (loopIndex == 5 && isPositiveSequence)  // 表示, 如果当前帧以 6 结尾, 则修改该帧间隔
+                duration = 1500;
+        }
+        return duration;
     }
 }

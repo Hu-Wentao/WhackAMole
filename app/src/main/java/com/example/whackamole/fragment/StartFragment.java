@@ -7,7 +7,7 @@ import com.example.whackamole.BuildConfig;
 import com.example.whackamole.MainActivity;
 import com.example.whackamole.R;
 import com.example.whackamole.base.BaseFragment;
-import com.example.whackamole.data.AppDate;
+import com.example.whackamole.data.AppData;
 
 import butterknife.OnClick;
 
@@ -36,11 +36,11 @@ public class StartFragment extends BaseFragment implements View.OnClickListener 
         switch (v.getId()) {
             case R.id.btn_normal:
                 // 设置当前游戏模式
-                AppDate.setBoolean(getContext(), AppDate.IS_NORMAL_GAME_MODEL, true);
+                AppData.setBoolean(getContext(), AppData.IS_NORMAL_GAME_MODEL, true);
                 ((MainActivity) mContext).changePage(1);
                 break;
             case R.id.btn_challenge:
-                AppDate.setBoolean(getContext(), AppDate.IS_NORMAL_GAME_MODEL, false);
+                AppData.setBoolean(getContext(), AppData.IS_NORMAL_GAME_MODEL, false);
                 ((MainActivity) mContext).changePage(1);
                 break;
             case R.id.btn_rank:

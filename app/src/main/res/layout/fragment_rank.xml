@@ -36,96 +36,37 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/textView" />
 
-    <android.support.constraint.ConstraintLayout
+    <LinearLayout
+        android:id="@+id/linear_rank"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginStart="8dp"
         android:layout_marginTop="8dp"
         android:layout_marginEnd="8dp"
         android:background="@drawable/shape_radius_button"
-        android:paddingBottom="16dp"
+        android:orientation="horizontal"
+        android:visibility="gone"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/tvTips">
 
-        <TextView
-            android:id="@+id/tvShow2"
-            android:layout_width="wrap_content"
+        <LinearLayout
+            android:id="@+id/linear_left"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="16dp"
-            android:text="第二名"
-            android:textColor="@color/c1"
-            android:textSize="18sp"
-            android:visibility="gone"
-            app:layout_constraintStart_toStartOf="@+id/tvShow1"
-            app:layout_constraintTop_toBottomOf="@+id/tvShow1" />
+            android:layout_weight="1"
+            android:orientation="vertical"
+            android:paddingTop="8dp"
+            android:paddingBottom="8dp" />
 
-        <TextView
-            android:id="@+id/tvScore_2"
-            android:layout_width="wrap_content"
+        <LinearLayout
+            android:id="@+id/linear_right"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginStart="8dp"
-            android:layout_marginEnd="8dp"
-            android:text="TextView"
-            android:textColor="@color/c1"
-            android:visibility="gone"
-            app:layout_constraintBaseline_toBaselineOf="@+id/tvShow2"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toEndOf="@+id/tvShow2" />
-
-        <TextView
-            android:id="@+id/tvScore_1"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="8dp"
-            android:layout_marginEnd="8dp"
-            android:text="TextView"
-            android:textColor="@color/c1"
-            android:visibility="gone"
-            app:layout_constraintBaseline_toBaselineOf="@+id/tvShow1"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toEndOf="@+id/tvShow1" />
-
-        <TextView
-            android:id="@+id/tvShow1"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="32dp"
-            android:layout_marginTop="16dp"
-            android:text="第一名"
-            android:textColor="@color/c1"
-            android:textSize="18sp"
-            android:visibility="gone"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
-
-        <TextView
-            android:id="@+id/tvShow3"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="16dp"
-            android:layout_marginBottom="0dp"
-            android:text="第三名"
-            android:textColor="@color/c1"
-            android:textSize="18sp"
-            android:visibility="gone"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintStart_toStartOf="@+id/tvShow2"
-            app:layout_constraintTop_toBottomOf="@+id/tvShow2" />
-
-        <TextView
-            android:id="@+id/tvScore_3"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="8dp"
-            android:layout_marginEnd="8dp"
-            android:text="TextView"
-            android:textColor="@color/c1"
-            android:visibility="gone"
-            app:layout_constraintBaseline_toBaselineOf="@+id/tvShow3"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toEndOf="@+id/tvShow3" />
-    </android.support.constraint.ConstraintLayout>
+            android:layout_weight="1"
+            android:orientation="vertical"
+            android:paddingTop="8dp"
+            android:paddingBottom="8dp" />
+    </LinearLayout>
 
 </android.support.constraint.ConstraintLayout>

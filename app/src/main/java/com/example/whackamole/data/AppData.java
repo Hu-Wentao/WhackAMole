@@ -7,7 +7,7 @@ import android.content.SharedPreferences;
  * @Author: hu.wentao@outlook.com
  * @Date: 2019/4/7
  */
-public class AppDate {
+public class AppData {
     private static final String APP_DATE = "appDate";
     private static SharedPreferences preferences;
     //= SharedPreference key
