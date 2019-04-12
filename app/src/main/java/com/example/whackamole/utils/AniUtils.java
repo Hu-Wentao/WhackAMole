@@ -38,7 +38,7 @@ public class AniUtils {
     public static long getAniDuration(boolean isBeaten) {
         int index = isBeaten ? 1 : 0;   // 此处是 -2, Normal为0, beaten为
         if (aniTime[index] == 0) {
-            AnimationDrawable drawable = getAnimationByName( isBeaten ? RAT_TYPE_BEATEN : RAT_TYPE_NORMAL, 1);
+            AnimationDrawable drawable = getAnimationByName(isBeaten ? RAT_TYPE_BEATEN : RAT_TYPE_NORMAL, 1);
             int t = 0;
             for (int i = 0; i < drawable.getNumberOfFrames(); i++) {
                 t += drawable.getDuration(i);
@@ -61,16 +61,17 @@ public class AniUtils {
             // 判断是什么Type
             mRatAnimation.put(aniType + aniColor,    // 开始产生需要的动画
                     (aniType == RAT_TYPE_NORMAL) ?  // 根据类型进行拼装
-                            productAnimationByName(      // 加上 公共down 动画
-                                    RAT_TYPE_PUBLIC, aniColor, 2,
-                                    productAnimationByName(  // 加上 老鼠down 动画
-                                            aniType, aniColor, 2,
-                                            productAnimationByName(  // 在公共up 动画基础上加上老鼠up 动画
-                                                    aniType, aniColor, 1,
-                                                    prodPubAnimation(aniColor, 1, new AnimationDrawable())// 一个向上的 颜色为aniColor的公共动画
-                                            )
-                                    )
-                            )
+                            (AnimationDrawable) c.getDrawable(c.getResources().getIdentifier("img_rat_normal_" + switchAniColor(aniColor), "drawable", c.getPackageName()))
+//                            productAnimationByName(      // 加上 公共down 动画
+//                                    RAT_TYPE_PUBLIC, aniColor, 2,
+//                                    productAnimationByName(  // 加上 老鼠down 动画
+//                                            aniType, aniColor, 2,
+//                                            productAnimationByName(  // 在公共up 动画基础上加上老鼠up 动画
+//                                                    aniType, aniColor, 1,
+//                                                    prodPubAnimation(aniColor, 1, new AnimationDrawable())// 一个向上的 颜色为aniColor的公共动画
+//                                            )
+//                                    )
+//                            )
                             :
                             (AnimationDrawable) c.getDrawable(c.getResources().getIdentifier("img_rat_beaten_" + switchAniColor(aniColor), "drawable", c.getPackageName()))
 

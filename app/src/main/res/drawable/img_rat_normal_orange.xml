@@ -1,0 +1,51 @@
+<animation-list xmlns:android="http://schemas.android.com/apk/res/android"
+    android:oneshot="true">
+    <item
+        android:drawable="@drawable/img_rat_public_orange_1"
+        android:duration="25" />
+    <item
+        android:drawable="@drawable/img_rat_public_orange_2"
+        android:duration="25" />
+    <item
+        android:drawable="@drawable/img_rat_public_orange_3"
+        android:duration="25" />
+
+    <item
+        android:drawable="@drawable/img_rat_normal_orange_1"
+        android:duration="25" />
+    <item
+        android:drawable="@drawable/img_rat_normal_orange_2"
+        android:duration="25" />
+    <item
+        android:drawable="@drawable/img_rat_normal_orange_3"
+        android:duration="25" />
+    <item
+        android:drawable="@drawable/img_rat_normal_orange_4"
+        android:duration="25" />
+    <item
+        android:drawable="@drawable/img_rat_normal_orange_5"
+        android:duration="100" />
+    <item
+        android:drawable="@drawable/img_rat_normal_orange_4"
+        android:duration="25" />
+    <item
+        android:drawable="@drawable/img_rat_normal_orange_3"
+        android:duration="25" />
+    <item
+        android:drawable="@drawable/img_rat_normal_orange_2"
+        android:duration="25" />
+    <item
+        android:drawable="@drawable/img_rat_normal_orange_1"
+        android:duration="25" />
+
+    <item
+        android:drawable="@drawable/img_rat_public_orange_3"
+        android:duration="25" />
+    <item
+        android:drawable="@drawable/img_rat_public_orange_1"
+        android:duration="25" />
+
+    <item
+        android:drawable="@drawable/img_rat_public_0"
+        android:duration="25" />
+</animation-list>

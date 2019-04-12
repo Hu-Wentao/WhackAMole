@@ -7,6 +7,7 @@ import android.os.Message;
 import android.support.annotation.NonNull;
 
 import com.example.whackamole.fragment.GameFragment;
+import com.example.whackamole.utils.AniUtils;
 import com.example.whackamole.utils.PhraseUtils;
 
 import java.util.HashSet;
@@ -17,12 +18,16 @@ import java.util.concurrent.TimeUnit;
  * Description : 随机线程
  */
 public class GameThread extends Thread {
+    ///===快速调整参数
+    // 游戏时长
+    private static final long GAME_TIME = 60 * 1000;
+//    private static final long GAME_TIME = 10 * 1000;     //todo test
+
     // 随机线程
-    public GameThread(Context context, Handler handler, HashSet<Integer> container) {
+    public GameThread(Handler handler, HashSet<Integer> container) {
         // 为 Handler赋值
         this.mainHandler = handler;
         this.threadControl = true;
-        this.startFlag = false;     // 游戏是否已开始
         this.gameRandom = new Random();     // 随机数生成器
         this.mOccupyHoleSet = container;  // 存放的是 不允许播放动画的 地洞的序号(防止动画重复播放)
 
@@ -39,23 +44,13 @@ public class GameThread extends Thread {
         while (threadControl) {     // 控制游戏是否允许
             if (GameFragment.sCurrentGameState == 0) {
                 handleRandom();
+                // 控制速度             /////////////////////////////////////////////////////////
+                ++speedControl;
                 try {
-                    // 控制速度             /////////////////////////////////////////////////////////
-                    ++speedControl;
-                    if (speedControl > 20) {
-                        Thread.sleep(400);
-                    } else if (speedControl > 15) {
-                        Thread.sleep(560);
-                    } else if (speedControl > 10) {
-                        Thread.sleep(650);
-                    } else if (speedControl > 5) {
-                        Thread.sleep(850);
-                    } else {
-                        Thread.sleep(950);
-                    }
+                    // speedControl/5 表示每放5次动画变换一档速度,   最长为1s, 最短为0    // 通过调整次数来减慢换挡频率
+                    TimeUnit.MILLISECONDS.sleep((6 - (speedControl / 10)) * 100 + 400);
                 } catch (InterruptedException e) {
                     e.printStackTrace();
-//                    Log.e(TAG, e.getMessage());
                 }
             }
         }
@@ -64,16 +59,15 @@ public class GameThread extends Thread {
     private void handleRandom() {
         //随机出来 接下来要出现 精灵的洞
         // 随机产生一个 {0, 1, 2}  中的数, 表示 红, 黄, 蓝 三种地鼠
-        int colorOrPhraseIndex;
-        if(GameFragment.isNormalModel){
-            colorOrPhraseIndex = gameRandom.nextInt(3);
-        }else {
-            colorOrPhraseIndex = PhraseUtils.getNextIndex();
+        int i;
+        if ((i = randomHole()) == -1) {
+            return;
         }
         Message.obtain(mainHandler,
                 GameFragment.MSG_WHAT_REFRESH,
-                randomHole(),   // 随机的洞
-                colorOrPhraseIndex)
+                i,   // 随机的洞
+                // 如果不是普通模式, 则仅出现黄色地鼠
+                GameFragment.isNormalModel ? gameRandom.nextInt(3) : AniUtils.RAT_COLOR_ORANGE)
                 .sendToTarget();
     }
 
@@ -83,14 +77,14 @@ public class GameThread extends Thread {
     private int randomHole() {
         int primaryHoleIndex;  // 将要播放动画的 洞Index
         do {
-            if (mOccupyHoleSet.size() == 12) {  // todo 发现问题....
-                try {
-                    TimeUnit.SECONDS.sleep(5);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
+            if (mOccupyHoleSet.size() == 12) {
+                return -1;
+//                try {
+//                    TimeUnit.SECONDS.sleep(5);
+//                } catch (InterruptedException e) {
+//                    e.printStackTrace();
+//                }
             }
-
             // 执行随机找洞
             primaryHoleIndex = gameRandom.nextInt(12);
         } while (mOccupyHoleSet.contains(primaryHoleIndex) || isHolePlaying(primaryHoleIndex));
@@ -100,26 +94,21 @@ public class GameThread extends Thread {
     /**
      * 检查洞是否有动画在播放, 这个与 mOccupyHoleSet重复了, 仅作为备选
      *
-     * @param turnUp 洞ID
+     * @param index 洞ID
      * @return 是否有动画播放
      */
-    private boolean isHolePlaying(int turnUp) {
+    private boolean isHolePlaying(int index) {
         for (int i = 0; i < mRatAnimationArr.length; i++) {
             if (!GameFragment.isNormalModel && i != 1)
                 continue;
-            for (int j = 0; j < mRatAnimationArr[i].length; j++) {
-                if (mRatAnimationArr[i][j].isRunning())
-                    return true;
-            }
+            if (mRatAnimationArr[i][index].isRunning())
+                return true;
         }
         return false;
     }
 
     public void startGame() {
-        startFlag = true;
         speedControl = 0;
-//        mCurMushroomCount = 0;    //todo del
-//        mCountDownTimer.start();
         GameTimer.start();
         // todo 背景音乐
 //        mBgMusicManager.playBackgroundMusic(getMusic(), true);
@@ -152,16 +141,7 @@ public class GameThread extends Thread {
 //        }
     }
 
-
-    ///===参数
-    // 游戏时长
-//    private static final long GAME_TIME = 18 * 1000;
-    private static final long GAME_TIME = 10 * 1000;     //todo test
-
-//    private static final int MAX_MUSHROOM = 12;
-
     private boolean threadControl;  // 线程控制..是否开始游戏..
-    private boolean startFlag;  // 开始标志
 
     private Handler mainHandler;    // 传入的Handler
     private Random gameRandom;      // 随机数

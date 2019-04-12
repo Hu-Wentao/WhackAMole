@@ -78,7 +78,8 @@ public class GameFragment extends BaseFragment implements View.OnClickListener {
         if (sCurrentGameState == 2) { // 如果游戏已结束
             System.out.println("进入游戏复位代码块");    //todo
             PhraseUtils.onGameRestart();
-            mGameThread.stopGame();
+            if (mGameThread != null)
+                mGameThread.stopGame();
 
             findViewById(R.id.constrain_game_result).setVisibility(View.GONE);
 //            findViewById(R.id.tv_pause_tips).callOnClick();
@@ -93,11 +94,11 @@ public class GameFragment extends BaseFragment implements View.OnClickListener {
 
         {// 初始化一些信息 - 不要改动顺序
             // 动态添加地洞 // 考虑根据情况同时添加TextView
-            addRatHole(isNormalModel);
+            addRatHole();
             // 初始化每个地洞对应的动画
             initRatAnimation(isNormalModel);
             if (sPhraseArr == null && !isNormalModel) {
-                sPhraseArr = PhraseUtils.getPhraseArr(this.mContext);
+                sPhraseArr = PhraseUtils.getPhraseArr();
             }
         }
         {   // 开始游戏逻辑
@@ -122,8 +123,8 @@ public class GameFragment extends BaseFragment implements View.OnClickListener {
                 continue;
             }
             for (int j = 0; j < sRatAnimationArr[i].length; j++) {
-                sRatAnimationArr[i][j] = (AnimationDrawable) AniUtils.getAnimationByName(getContext(), AniUtils.RAT_TYPE_NORMAL, i).getConstantState().newDrawable();
-                sHitRatAnimationArr[i][j] = (AnimationDrawable) AniUtils.getAnimationByName(getContext(), AniUtils.RAT_TYPE_BEATEN, i).getConstantState().newDrawable();
+                sRatAnimationArr[i][j] = (AnimationDrawable) AniUtils.getAnimationByName(AniUtils.RAT_TYPE_NORMAL, i).getConstantState().newDrawable();
+                sHitRatAnimationArr[i][j] = (AnimationDrawable) AniUtils.getAnimationByName(AniUtils.RAT_TYPE_BEATEN, i).getConstantState().newDrawable();
             }
         }
     }
@@ -131,9 +132,8 @@ public class GameFragment extends BaseFragment implements View.OnClickListener {
     /**
      * 动态添加地洞, 为 地洞view 配置tag(0 - 11)
      * 使用 sRateHoleArray 存储
-     * //todo 在此处实现成语打地鼠的 TextVIew, 考虑添加 boolean isNormalModel 参数
      */
-    private void addRatHole(boolean isNormalModel) {
+    private void addRatHole() {
         GridLayout layout = findViewById(R.id.gridlayout_rat_hole);
         // todo 考虑同时添加一个 TextView, 并将GridView 换成 8行 3列的
         for (int i = 0; i < 12; i++) {
@@ -178,30 +178,12 @@ public class GameFragment extends BaseFragment implements View.OnClickListener {
      * @param v 传入的是被点击的RatHole,
      */
     private void onHoleClick(final View v) {
-        // 判断是否 处于游戏中
-        if (sCurrentGameState != 0) {
-            return;
-        }
-        // 判断 view是否有效
-        if (v.getTag(R.id.hole_current_color) == null || v.getTag(R.id.hole_index) == null) {
+        // 判断是否 处于游戏中 // 判断 view是否有效
+        if (sCurrentGameState != 0 || v.getTag(R.id.hole_current_color) == null || v.getTag(R.id.hole_index) == null) {
             return;
         }
         final int aniColor = (int) v.getTag(R.id.hole_current_color);
         final int holeId = (int) v.getTag(R.id.hole_index);
-        // 处理得分情况, //todo 可以在此处同时播放音效
-        switch (aniColor) {
-            case AniUtils.RAT_COLOR_RED:
-                currentScore += 10;
-                break;
-            case AniUtils.RAT_COLOR_ORANGE:
-                currentScore += 20;
-                break;
-            case AniUtils.RAT_COLOR_BLUE:
-                currentScore -= 15;
-                break;
-        }
-        // 更新分数
-        ((TextView) findViewById(R.id.tv_current_score)).setText(String.valueOf(currentScore));
 
         // 获取该洞的所属的动画
         AnimationDrawable aniDrawable = sRatAnimationArr[aniColor][holeId];
@@ -219,7 +201,6 @@ public class GameFragment extends BaseFragment implements View.OnClickListener {
         view.setBackground(hitDrawable);  // 设置被击打动画
         hitDrawable.setVisible(true, false);    // 似乎没什么用
         hitDrawable.start();
-
 
         // 然后处理原来的动画
         mGameHandler.removeMessages(MSG_WHAT_ANIM_STOP, aniDrawable);
@@ -248,6 +229,21 @@ public class GameFragment extends BaseFragment implements View.OnClickListener {
                 sOccupyHoleSet.remove(holeId);
             }
         }, 1500);   // 表示该洞在 delayMillis 秒内不会再出现地鼠
+
+        // 处理得分情况, //todo 可以在此处同时播放音效
+        switch (aniColor) {
+            case AniUtils.RAT_COLOR_RED:
+                currentScore += 10;
+                break;
+            case AniUtils.RAT_COLOR_ORANGE:
+                currentScore += 20;
+                break;
+            case AniUtils.RAT_COLOR_BLUE:
+                currentScore -= 15;
+                break;
+        }
+        // 更新分数
+        ((TextView) findViewById(R.id.tv_current_score)).setText(String.valueOf(currentScore));
     }
 
     private void onGameStart(boolean isNormalModel) {
@@ -257,7 +253,7 @@ public class GameFragment extends BaseFragment implements View.OnClickListener {
         currentScore = 0;
 
         // 开启线程
-        mGameThread = new GameThread(getContext(), mGameHandler, sOccupyHoleSet);
+        mGameThread = new GameThread( mGameHandler, sOccupyHoleSet);
         mGameThread.setAnimationArr(sRatAnimationArr);
 
         // 开启线轮询
@@ -268,32 +264,17 @@ public class GameFragment extends BaseFragment implements View.OnClickListener {
     private void onGameRefresh(int hole, int colorOrPhraseIndex) {
         int aniColor = AniUtils.RAT_COLOR_ORANGE;
         long aniDuration = AniUtils.getAniDuration(false);
-        if (isNormalModel) {
-            aniColor = colorOrPhraseIndex;
-        } else {
-            aniDuration -= 100;
-        }
-        // 要播放的动画
-        AnimationDrawable targetAniDrawable = sRatAnimationArr[aniColor][hole];
         // 获取该洞的view
         final ImageView view = sRateHoleArray.get(hole);
-//        view.setImageDrawable();
-        // 清空背景,并设置动画
-        view.setBackgroundResource(0);
-        view.setBackground(targetAniDrawable);
-        // 设置tag, 标记这个view播放的动画的颜色
-        view.setTag(R.id.hole_current_color, aniColor);
-
-        // 设置AnimationDrawable可见性, 然后播放动画
-        //todo 设置 restart 为 true, 在成语模式下, 应该会 保证游戏运行正常.....
-        targetAniDrawable.setVisible(true, true);
-        targetAniDrawable.start();
-
-        if (!isNormalModel) { // 如果是挑战模式, 则延时 sGapeTime展示成语图  //todo
+        if (isNormalModel) {
+            aniColor = colorOrPhraseIndex;
+        } else {                                        // 如果是挑战模式, 则延时 sGapeTime展示成语图
+            aniDuration -= 100;
             view.postDelayed(new Runnable() {
                 @Override
                 public void run() {
-                    view.setImageDrawable(PhraseUtils.getNextDrawable(getContext()));
+                    view.setImageDrawable(PhraseUtils.getNextDrawable());
+//                    view.setImageTintList();
                 }
             }, sGapeTime);
             view.postDelayed(new Runnable() {
@@ -303,7 +284,18 @@ public class GameFragment extends BaseFragment implements View.OnClickListener {
                 }
             }, AniUtils.getAniDuration(false) - sGapeTime);
         }
+        //------------------------------------------------------------------------------------------
+        // 要播放的动画
+        AnimationDrawable targetAniDrawable = sRatAnimationArr[aniColor][hole];
+        // 清空背景,并设置动画
+        view.setBackgroundResource(0);
+        view.setBackground(targetAniDrawable);
+        view.setTag(R.id.hole_current_color, aniColor);        // 设置tag, 标记这个view播放的动画的颜色
+        // 设置AnimationDrawable可见性, 然后播放动画
+        targetAniDrawable.setVisible(true, true);
+        targetAniDrawable.start();
 
+        //------------------------------------------------------------------------------------------
         // 发送一个消息, 表示该动画的播放时长, 设置在动画时长结束后,停止播放动画
         Message obtain = Message.obtain();
         obtain.what = MSG_WHAT_ANIM_STOP;
@@ -346,7 +338,6 @@ public class GameFragment extends BaseFragment implements View.OnClickListener {
                 // 销毁当前Fragment, 前往排行榜
                 GameFragment.this.onDestroy();
                 ((MainActivity) getActivity()).changePage(2);
-
                 break;
             default:
                 if (BuildConfig.DEBUG) Log.d("swR+GameFragment", "未处理的点击事件...");
@@ -422,7 +413,6 @@ public class GameFragment extends BaseFragment implements View.OnClickListener {
     @Override
     public void onDestroy() {
         super.onDestroy();
-
         if (mGameThread != null) {
             mGameThread.release();
         }
