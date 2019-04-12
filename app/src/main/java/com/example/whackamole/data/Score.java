@@ -28,8 +28,6 @@ public class Score {
             int[] t = new int[3];
             System.arraycopy(r, r.length-3, t, 0, 3);
             AppData.setString(c, AppData.SCORE_ARR_STRING, t[0]+" "+t[1]+" "+t[2]+" ");
-
-            System.out.println(Arrays.toString(r) +"\n"+Arrays.toString(r)); //todo
             return t;
         }
         return r;

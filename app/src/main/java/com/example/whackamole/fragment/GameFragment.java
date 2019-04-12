@@ -38,7 +38,7 @@ public class GameFragment extends BaseFragment implements View.OnClickListener {
     private static HashSet<Integer> sOccupyHoleSet = new HashSet<>(12);
     // 当前游戏模式
     public static boolean isNormalModel;
-    // 当前游戏状态  -1 未开始, 0 游戏中, 1 暂停 2结束
+    // 当前游戏状态  -1 未开始(无意义), 0 游戏中, 1 暂停 2结束
     public static byte sCurrentGameState = -1;
     // 当前游戏得分
     private int currentScore;
@@ -74,12 +74,29 @@ public class GameFragment extends BaseFragment implements View.OnClickListener {
     @Override
     protected void doInit() {
         isNormalModel = AppData.getBoolean(getContext(), AppData.IS_NORMAL_GAME_MODEL, true);
+        System.out.println("进入INIT方法........"); //todo
+        if (sCurrentGameState == 2) { // 如果游戏已结束
+            System.out.println("进入游戏复位代码块");    //todo
+            PhraseUtils.onGameRestart();
+            mGameThread.stopGame();
+
+            findViewById(R.id.constrain_game_result).setVisibility(View.GONE);
+//            findViewById(R.id.tv_pause_tips).callOnClick();
+
+            // 复位所有的洞View
+            for (int i = 0; i < sRateHoleArray.size(); i++) {
+                sRateHoleArray.get(i).setImageResource(0);
+                sRateHoleArray.get(i).setBackgroundResource(R.drawable.img_rat_public_0);
+            }
+//            sCurrentGameState = 0;  // 无需在此处声明游戏开始, 在Handler的onGameStart处更合适
+        }
+
         {// 初始化一些信息 - 不要改动顺序
             // 动态添加地洞 // 考虑根据情况同时添加TextView
             addRatHole(isNormalModel);
             // 初始化每个地洞对应的动画
             initRatAnimation(isNormalModel);
-            if(sPhraseArr == null && !isNormalModel){
+            if (sPhraseArr == null && !isNormalModel) {
                 sPhraseArr = PhraseUtils.getPhraseArr(this.mContext);
             }
         }
@@ -160,7 +177,7 @@ public class GameFragment extends BaseFragment implements View.OnClickListener {
      *
      * @param v 传入的是被点击的RatHole,
      */
-    private void onHoleClick(View v) {
+    private void onHoleClick(final View v) {
         // 判断是否 处于游戏中
         if (sCurrentGameState != 0) {
             return;
@@ -193,18 +210,17 @@ public class GameFragment extends BaseFragment implements View.OnClickListener {
             return;
         }
         // 获取该洞
-        ImageView view = sRateHoleArray.get(holeId);
+        final ImageView view = sRateHoleArray.get(holeId);
+        // 删除洞的ImageDrawable
+        view.setImageDrawable(null);
 
         // 先切换到击打动画, 并播放
         AnimationDrawable hitDrawable = sHitRatAnimationArr[aniColor][holeId];
-        sRateHoleArray.get(holeId).setBackground(hitDrawable);  // 设置被击打动画
+        view.setBackground(hitDrawable);  // 设置被击打动画
         hitDrawable.setVisible(true, false);    // 似乎没什么用
         hitDrawable.start();
 
-        if(!isNormalModel){ // 如果是挑战模式, 则延时 sGapeTime展示成语图
 
-
-        }
         // 然后处理原来的动画
         mGameHandler.removeMessages(MSG_WHAT_ANIM_STOP, aniDrawable);
         aniDrawable.setVisible(false, false);
@@ -212,11 +228,10 @@ public class GameFragment extends BaseFragment implements View.OnClickListener {
         aniDrawable.selectDrawable(0);  // 将动画设置到第一张(初始状态)
 
         // 在打击动画播放完毕后, 结束动画
-
         view.postDelayed(new Runnable() {
             @Override
             public void run() {
-                sRateHoleArray.get(holeId).setBackgroundResource(R.drawable.img_rat_public_0);  // 复位该控件背景
+                view.setBackgroundResource(R.drawable.img_rat_public_0);  // 复位该控件背景
                 sHitRatAnimationArr[aniColor][holeId].setVisible(false, false);
                 sHitRatAnimationArr[aniColor][holeId].stop();   // 停止动画
                 sHitRatAnimationArr[aniColor][holeId].selectDrawable(0);    //
@@ -224,13 +239,12 @@ public class GameFragment extends BaseFragment implements View.OnClickListener {
         }, AniUtils.getAniDuration(true));
 
 
-
         // 处理动画的播放, 并在mOccupyHoleSet 中标记正在播放动画的洞
         sOccupyHoleSet.add(holeId);
-        sRateHoleArray.get(holeId).postDelayed(new Runnable() {
+        view.postDelayed(new Runnable() {
             @Override
             public void run() {
-                sRateHoleArray.get(holeId).setBackgroundResource(R.drawable.img_rat_public_0);
+                view.setBackgroundResource(R.drawable.img_rat_public_0);
                 sOccupyHoleSet.remove(holeId);
             }
         }, 1500);   // 表示该洞在 delayMillis 秒内不会再出现地鼠
@@ -254,15 +268,15 @@ public class GameFragment extends BaseFragment implements View.OnClickListener {
     private void onGameRefresh(int hole, int colorOrPhraseIndex) {
         int aniColor = AniUtils.RAT_COLOR_ORANGE;
         long aniDuration = AniUtils.getAniDuration(false);
-        if(isNormalModel){
+        if (isNormalModel) {
             aniColor = colorOrPhraseIndex;
-        }else {
+        } else {
             aniDuration -= 100;
         }
         // 要播放的动画
         AnimationDrawable targetAniDrawable = sRatAnimationArr[aniColor][hole];
         // 获取该洞的view
-        ImageView view = sRateHoleArray.get(hole);
+        final ImageView view = sRateHoleArray.get(hole);
 //        view.setImageDrawable();
         // 清空背景,并设置动画
         view.setBackgroundResource(0);
@@ -275,12 +289,20 @@ public class GameFragment extends BaseFragment implements View.OnClickListener {
         targetAniDrawable.setVisible(true, true);
         targetAniDrawable.start();
 
-
-//        // 获取该动画的播放时长
-//        int duration = 0;
-//        for (int i = 0; i < targetAniDrawable.getNumberOfFrames(); i++) {
-//            duration += targetAniDrawable.getDuration(i);
-//        }
+        if (!isNormalModel) { // 如果是挑战模式, 则延时 sGapeTime展示成语图  //todo
+            view.postDelayed(new Runnable() {
+                @Override
+                public void run() {
+                    view.setImageDrawable(PhraseUtils.getNextDrawable(getContext()));
+                }
+            }, sGapeTime);
+            view.postDelayed(new Runnable() {
+                @Override
+                public void run() {
+                    view.setImageDrawable(null);
+                }
+            }, AniUtils.getAniDuration(false) - sGapeTime);
+        }
 
         // 发送一个消息, 表示该动画的播放时长, 设置在动画时长结束后,停止播放动画
         Message obtain = Message.obtain();
@@ -317,7 +339,7 @@ public class GameFragment extends BaseFragment implements View.OnClickListener {
     public void onClick(View v) {
         switch (v.getId()) {
             case R.id.iv_pause_play:
-                setPauseOrPlay(sCurrentGameState == 0);
+                setPauseOrPlay(sCurrentGameState);
                 break;
             case R.id.btn_next:
                 Score.addScore(String.valueOf(currentScore), getContext());
@@ -332,15 +354,15 @@ public class GameFragment extends BaseFragment implements View.OnClickListener {
     }
 
     /**
-     * @param isSetPause true: 显示 "游戏暂停" 提示
+     * @param gameState true: 显示 "游戏暂停" 提示
      */
-    private void setPauseOrPlay(boolean isSetPause) {
-        if (isSetPause) {
+    private void setPauseOrPlay(int gameState) {
+        if (gameState == 0) {
             sCurrentGameState = 1;   //暂停
             GameTimer.pause();
             ((ImageView) findViewById(R.id.iv_pause_play)).setImageResource(android.R.drawable.ic_media_play);
             findViewById(R.id.tv_pause_tips).setVisibility(View.VISIBLE);
-        } else {
+        } else if (gameState == 1) {
             sCurrentGameState = 0;   // 游戏中
             GameTimer.play();
             ((ImageView) findViewById(R.id.iv_pause_play)).setImageResource(android.R.drawable.ic_media_pause);
@@ -381,35 +403,20 @@ public class GameFragment extends BaseFragment implements View.OnClickListener {
     @Override
     public void onStart() {
         super.onStart();
-        if (sCurrentGameState == 2) {
-            // 初始化游戏(重新开始游戏)
-            // 1. 先结束游戏
-            mGameThread.stopGame();
-
-            // 2. 配置场景
-            findViewById(R.id.constrain_game_result).setVisibility(View.INVISIBLE);
-            findViewById(R.id.tv_pause_tips).callOnClick();
-            for (int i = 0; i < sRateHoleArray.size(); i++) {
-                sRateHoleArray.get(i).setImageResource(0);
-                sRateHoleArray.get(i).setBackgroundResource(R.drawable.img_rat_public_0);
-            }
-            sCurrentGameState = 0;
-
-            // 3. 开始游戏
-            doInit();
-        }
     }
 
     @Override
     public void onResume() {
         super.onResume();
-        setPauseOrPlay(false);
+        if (sCurrentGameState == 2) {
+            doInit();
+        }
     }
 
     @Override
     public void onPause() {
         super.onPause();
-        setPauseOrPlay(true);
+        setPauseOrPlay(sCurrentGameState);
     }
 
     @Override

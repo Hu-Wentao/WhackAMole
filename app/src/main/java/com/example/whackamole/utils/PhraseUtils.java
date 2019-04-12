@@ -15,28 +15,37 @@ import java.util.Random;
  * @Date: 2019/4/12
  */
 public class PhraseUtils {
-    private static final int[] phraseImgXY = {4, 10};
+    private static final int[] phraseImgXY = {4, 10};   // 切割图片的宽与高1
 
     private static Drawable[] phraseArr;
     private static int currentIndex = 0;
 
-    public static Drawable[] getPhraseArr(Context c) {
+    // 在游戏重启时调用
+    public static void onGameRestart(){
+        currentIndex = 0;
+    }
 
-        Bitmap[] b = split(BitmapFactory.decodeResource(c.getResources(), R.drawable.img_phrase), phraseImgXY);
+    public static Drawable[] getPhraseArr() {
+
+        Bitmap[] b = split(BitmapFactory.decodeResource(ContextImp.getContext().getResources(), R.drawable.img_phrase), phraseImgXY);
         if (phraseArr == null) {
             phraseArr = new Drawable[phraseImgXY[0] * phraseImgXY[1]];
             for (int i = 0; i < phraseArr.length; i++) {
-                phraseArr[i] = new BitmapDrawable(c.getResources(), b[i]);
+                phraseArr[i] = new BitmapDrawable(ContextImp.getContext().getResources(), b[i]);
             }
         }
         return phraseArr;
     }
 
-    public static int getCurrentIndex() {
-        if (currentIndex == 0 || currentIndex == 40) {
+    public static int getNextIndex() {
+        if (currentIndex == 40) {
             currentIndex = new Random().nextInt(10) * 4;
         }
         return currentIndex++;
+    }
+
+    public static Drawable getNextDrawable(Context c){
+        return getPhraseArr()[getNextIndex()];
     }
 
 

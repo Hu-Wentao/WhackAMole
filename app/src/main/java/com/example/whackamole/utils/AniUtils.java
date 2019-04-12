@@ -38,7 +38,7 @@ public class AniUtils {
     public static long getAniDuration(boolean isBeaten) {
         int index = isBeaten ? 1 : 0;   // 此处是 -2, Normal为0, beaten为
         if (aniTime[index] == 0) {
-            AnimationDrawable drawable = getAnimationByName(null, isBeaten ? RAT_TYPE_BEATEN : RAT_TYPE_NORMAL, 1);
+            AnimationDrawable drawable = getAnimationByName( isBeaten ? RAT_TYPE_BEATEN : RAT_TYPE_NORMAL, 1);
             int t = 0;
             for (int i = 0; i < drawable.getNumberOfFrames(); i++) {
                 t += drawable.getDuration(i);
@@ -51,24 +51,23 @@ public class AniUtils {
     /**
      * 获取指定类型的动画
      *
-     * @param c        上下文
      * @param aniType  类型, 是normal还是beaten
      * @param aniColor 颜色, 什么颜色的老鼠
      * @return 动画
      */
-//    public static Drawable getAnimationByName(Context c, int aniType, int aniColor) {
-    public static AnimationDrawable getAnimationByName(Context c, int aniType, int aniColor) {
+    public static AnimationDrawable getAnimationByName(int aniType, int aniColor) {
+        Context c = ContextImp.getContext();
         if (mRatAnimation.get(aniType + aniColor) == null) {
             // 判断是什么Type
             mRatAnimation.put(aniType + aniColor,    // 开始产生需要的动画
                     (aniType == RAT_TYPE_NORMAL) ?  // 根据类型进行拼装
-                            productAnimationByName(c,      // 加上 公共down 动画
+                            productAnimationByName(      // 加上 公共down 动画
                                     RAT_TYPE_PUBLIC, aniColor, 2,
-                                    productAnimationByName(c,  // 加上 老鼠down 动画
+                                    productAnimationByName(  // 加上 老鼠down 动画
                                             aniType, aniColor, 2,
-                                            productAnimationByName(c,  // 在公共up 动画基础上加上老鼠up 动画
+                                            productAnimationByName(  // 在公共up 动画基础上加上老鼠up 动画
                                                     aniType, aniColor, 1,
-                                                    prodPubAnimation(c, aniColor, 1, new AnimationDrawable())// 一个向上的 颜色为aniColor的公共动画
+                                                    prodPubAnimation(aniColor, 1, new AnimationDrawable())// 一个向上的 颜色为aniColor的公共动画
                                             )
                                     )
                             )
@@ -77,20 +76,19 @@ public class AniUtils {
 
 
             );
-            if (mRatAnimation.size() == 9) {  // 当所有的动画都已经生产完毕, 则清空缓存
-                mPublicAniArr.clear();    // todo 如果没问题的话,可以让其等于 null, 让gc回收资源
-            }
-//            System.err.println("mRatAnimation.size():" + mRatAnimation.size()); //todo 确保它的大小不会超过9, 否则需要修改代码
+//            if (mRatAnimation.size() == 9) {  // 当所有的动画都已经生产完毕, 则清空缓存
+//                mPublicAniArr.clear();
+//            }
         }
         return mRatAnimation.get(aniType + aniColor);
     }
 
 
-    private static AnimationDrawable prodPubAnimation(Context c, int aniColor, int aniUpOrDown, AnimationDrawable oldAniDrawable) {
+    private static AnimationDrawable prodPubAnimation(int aniColor, int aniUpOrDown, AnimationDrawable oldAniDrawable) {
         if (mPublicAniArr.get(aniColor + aniUpOrDown) == null) {
             if (oldAniDrawable == null)
                 oldAniDrawable = new AnimationDrawable();
-            mPublicAniArr.put(aniColor + aniUpOrDown, productAnimationByName(c, RAT_TYPE_PUBLIC, aniColor, aniUpOrDown, oldAniDrawable));
+            mPublicAniArr.put(aniColor + aniUpOrDown, productAnimationByName(RAT_TYPE_PUBLIC, aniColor, aniUpOrDown, oldAniDrawable));
         }
         return mPublicAniArr.get(aniColor + aniUpOrDown);
     }
@@ -98,14 +96,13 @@ public class AniUtils {
     /**
      * 生产 AnimationDrawable
      *
-     * @param c              上下文
      * @param oldAniDrawable 原有的AnimationDrawable, 可以填 new AnimationDrawable()
      * @param aniType        类型
      * @param aniColor       动画颜色
      * @param aniUpOrDown    动画中的老鼠是向上的, 还是向下的
      * @return 动画
      */
-    private static AnimationDrawable productAnimationByName(Context c, int aniType, int aniColor, int aniUpOrDown, AnimationDrawable oldAniDrawable) {
+    private static AnimationDrawable productAnimationByName(int aniType, int aniColor, int aniUpOrDown, AnimationDrawable oldAniDrawable) {
         String param = "";
         int picNum = 6; // 默认6张图
         boolean isUp = aniUpOrDown == 1;
@@ -121,7 +118,7 @@ public class AniUtils {
                 param = "beaten";
                 break;
         }
-        return getRatAnimation(c, oldAniDrawable, param, switchAniColor(aniColor), picNum, isUp);
+        return getRatAnimation(oldAniDrawable, param, switchAniColor(aniColor), picNum, isUp);
     }
 
     // 添加颜色参数
@@ -139,16 +136,15 @@ public class AniUtils {
     }
 
     /**
-     * @param c                  上下文
      * @param oldAniDrawable     原有的动画(可以填 new AnimationDrawable() )
      *                           //     * @param param              动画名中的 类型_颜色
      * @param picNum             图片张数
      * @param isPositiveSequence 帧动画的帧序号是从小到大, 还是从大到小
      * @return 动画
      */
-    private static AnimationDrawable getRatAnimation(Context c, AnimationDrawable oldAniDrawable, String aniType, String aniColor, int picNum, boolean isPositiveSequence) {
+    private static AnimationDrawable getRatAnimation(AnimationDrawable oldAniDrawable, String aniType, String aniColor, int picNum, boolean isPositiveSequence) {
+        Context c = ContextImp.getContext();
         for (int i = 0; i < picNum; i++) { // 图片资源序号从1开始到picNum
-            System.out.println("img_rat_" + aniType + "_" + aniColor + "_" + ((isPositiveSequence ? i + 1 : picNum - i)));//todo
             Drawable drawable =
                     c.getDrawable(c.getResources().getIdentifier(
                             "img_rat_" + aniType + "_" + aniColor + "_" + ((isPositiveSequence ? i + 1 : picNum - i))

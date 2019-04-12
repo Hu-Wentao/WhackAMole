@@ -7,7 +7,6 @@ import android.os.Message;
 import android.support.annotation.NonNull;
 
 import com.example.whackamole.fragment.GameFragment;
-import com.example.whackamole.utils.AniUtils;
 import com.example.whackamole.utils.PhraseUtils;
 
 import java.util.HashSet;
@@ -69,7 +68,7 @@ public class GameThread extends Thread {
         if(GameFragment.isNormalModel){
             colorOrPhraseIndex = gameRandom.nextInt(3);
         }else {
-            colorOrPhraseIndex = PhraseUtils.getCurrentIndex();
+            colorOrPhraseIndex = PhraseUtils.getNextIndex();
         }
         Message.obtain(mainHandler,
                 GameFragment.MSG_WHAT_REFRESH,

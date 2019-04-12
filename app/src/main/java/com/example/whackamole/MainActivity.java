@@ -9,11 +9,7 @@ import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
-import android.view.View;
 import android.view.Window;
-import android.widget.GridLayout;
-import android.widget.ImageView;
-import android.widget.LinearLayout;
 import android.widget.Toast;
 
 import com.example.whackamole.base.BackHandledInterface;
@@ -22,7 +18,6 @@ import com.example.whackamole.fragment.GameFragment;
 import com.example.whackamole.fragment.RankFragment;
 import com.example.whackamole.fragment.SettingFragment;
 import com.example.whackamole.fragment.StartFragment;
-import com.example.whackamole.utils.PhraseUtils;
 
 /**
  * Created by magical.zhang on 2018/5/21.
@@ -57,7 +52,7 @@ public class MainActivity extends AppCompatActivity implements BackHandledInterf
 //            @Override
 //            public void onTick(long millisUntilFinished) {
 //                ImageView v = new ImageView(getBaseContext());
-//                v.setImageDrawable(d[PhraseUtils.getCurrentIndex()]);
+//                v.setImageDrawable(d[PhraseUtils.getNextIndex()]);
 //                test.addView( v );
 //            }
 //
