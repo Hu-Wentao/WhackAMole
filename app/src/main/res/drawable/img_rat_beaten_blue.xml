@@ -3,7 +3,6 @@ android:oneshot="true">
 <item
     android:drawable="@drawable/img_rat_beaten_blue_6"
     android:duration="25"/>
-
 <item
     android:drawable="@drawable/img_rat_beaten_blue_5"
     android:duration="25"/>

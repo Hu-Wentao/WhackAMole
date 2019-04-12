@@ -18,7 +18,7 @@ public class AniUtils {
     // 公共动画部分的缓存, KEY 通过:
     private static SparseArray<AnimationDrawable> mPublicAniArr = new SparseArray<>(6);
     // getAnimationByName的参数, 不要改变数值的大小! 个位会存储老鼠动画是向上还是向下
-    private static final int RAT_TYPE_PUBLIC = 10;  // 不要改变参数值, TYPE 参数值关联 getAniTime(), 等方法
+    private static final int RAT_TYPE_PUBLIC = 10;  // 不要改变参数值, TYPE 参数值关联 getAniDuration(), 等方法
     public static final int RAT_TYPE_NORMAL = 20;
     public static final int RAT_TYPE_BEATEN = 30;
 
@@ -29,7 +29,13 @@ public class AniUtils {
     // 动画的播放时长: Normal 和 Beaten
     private static int[] aniTime = new int[2];
 
-    public static long getAniTime(boolean isBeaten) {
+    /**
+     * 获取动画的播放时长
+     *
+     * @param isBeaten
+     * @return
+     */
+    public static long getAniDuration(boolean isBeaten) {
         int index = isBeaten ? 1 : 0;   // 此处是 -2, Normal为0, beaten为
         if (aniTime[index] == 0) {
             AnimationDrawable drawable = getAnimationByName(null, isBeaten ? RAT_TYPE_BEATEN : RAT_TYPE_NORMAL, 1);
@@ -164,14 +170,14 @@ public class AniUtils {
     //配置动画帧间隔
     private static int setDuration(int loopIndex, boolean isPositiveSequence, String aniType) {
         // 默认间隔
-        int duration = 40;
+        int duration = 25;
 
-        // 如果是 被击败 的动画, 则间隔增加两倍
-        if ("beaten".equals(aniType) || ("public").equals(aniType) && !isPositiveSequence) {
-            duration *= 1.5;
-        } else {
-            if (loopIndex == 5 && isPositiveSequence)  // 表示, 如果当前帧以 6 结尾, 则修改该帧间隔
-                duration = 1500;
+        // 如果是 被击败 的动画, 则间隔增加_倍
+//        if ("beaten".equals(aniType) || ("public").equals(aniType) && !isPositiveSequence) {
+//            duration *= 1.5;
+//        } else {
+        if (loopIndex == 5 && isPositiveSequence) {  // 表示, 如果当前帧以 6 结尾, 则修改该帧间隔
+            duration = 1500;
         }
         return duration;
     }

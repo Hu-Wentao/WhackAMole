@@ -1,7 +1,7 @@
 package com.example.whackamole;
 
-import android.graphics.drawable.AnimationDrawable;
 import android.graphics.drawable.Drawable;
+import android.os.CountDownTimer;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 
@@ -9,8 +9,11 @@ import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
+import android.view.View;
 import android.view.Window;
+import android.widget.GridLayout;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.Toast;
 
 import com.example.whackamole.base.BackHandledInterface;
@@ -19,9 +22,7 @@ import com.example.whackamole.fragment.GameFragment;
 import com.example.whackamole.fragment.RankFragment;
 import com.example.whackamole.fragment.SettingFragment;
 import com.example.whackamole.fragment.StartFragment;
-import com.example.whackamole.utils.AniUtils;
-
-import java.util.ArrayList;
+import com.example.whackamole.utils.PhraseUtils;
 
 /**
  * Created by magical.zhang on 2018/5/21.
@@ -33,7 +34,7 @@ public class MainActivity extends AppCompatActivity implements BackHandledInterf
     private GameFragment mGameFragment;
     private RankFragment mRankFragment;
     private SettingFragment mSettingFragment;
-//    private ArrayList<Fragment> mFragmentList = new ArrayList<>();
+    //    private ArrayList<Fragment> mFragmentList = new ArrayList<>();
     private Fragment[] mFragmentArr;
     private BaseFragment mBackHandleFragment;
 
@@ -44,17 +45,30 @@ public class MainActivity extends AppCompatActivity implements BackHandledInterf
         super.onCreate(savedInstanceState);
         requestWindowFeature(Window.FEATURE_NO_TITLE);
         setContentView(R.layout.activity_game_main);
-
         initPage();
-//----------------
-//        ImageView test = findViewById(R.id.imageView);
-//        Drawable target = AniUtils.getAnimationByName(this, AniUtils.RAT_TYPE_NORMAL, AniUtils.RAT_COLOR_ORANGE);
-////        test.setImageDrawable(AniUtils.getAnimationByName(this, AniUtils.RAT_TYPE_NORMAL, AniUtils.RAT_COLOR_ORANGE));
-//        test.setBackground(target);
-//        target.setVisible(true, false);
-//        ((AnimationDrawable) target).start();
-//----------------
         changePage(0);
+
+//----------------
+//        final LinearLayout test = findViewById(R.id.testLayout);
+//        test.setVisibility(View.VISIBLE);
+//        final Drawable[] d = PhraseUtils.getPhraseArr(this);
+//
+//        CountDownTimer t = new CountDownTimer(4000, 100) {
+//            @Override
+//            public void onTick(long millisUntilFinished) {
+//                ImageView v = new ImageView(getBaseContext());
+//                v.setImageDrawable(d[PhraseUtils.getCurrentIndex()]);
+//                test.addView( v );
+//            }
+//
+//            @Override
+//            public void onFinish() {
+//
+//            }
+//        };
+//        t.start();
+//----------------
+
     }
 
     private void initPage() {
@@ -97,14 +111,14 @@ public class MainActivity extends AppCompatActivity implements BackHandledInterf
 
     @Override   // 返回键操作
     public void onBackPressed() {
-        if(mBackHandleFragment.needHandleBackPress()){
+        if (mBackHandleFragment.needHandleBackPress()) {
             canQuitActivity = System.currentTimeMillis();
             changePage(0);
         }
-        if(mBackHandleFragment == mStartFragment || mBackHandleFragment == mGameFragment){
-            if(System.currentTimeMillis() - canQuitActivity < 300){
+        if (mBackHandleFragment == mStartFragment || mBackHandleFragment == mGameFragment) {
+            if (System.currentTimeMillis() - canQuitActivity < 300) {
                 this.finish();
-            }else {
+            } else {
                 Toast.makeText(this, "双击返回键退出App", Toast.LENGTH_SHORT).show();
                 canQuitActivity = System.currentTimeMillis();
             }

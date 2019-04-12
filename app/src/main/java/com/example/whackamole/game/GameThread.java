@@ -2,12 +2,13 @@ package com.example.whackamole.game;
 
 import android.content.Context;
 import android.graphics.drawable.AnimationDrawable;
-import android.os.CountDownTimer;
 import android.os.Handler;
 import android.os.Message;
 import android.support.annotation.NonNull;
 
 import com.example.whackamole.fragment.GameFragment;
+import com.example.whackamole.utils.AniUtils;
+import com.example.whackamole.utils.PhraseUtils;
 
 import java.util.HashSet;
 import java.util.Random;
@@ -31,30 +32,27 @@ public class GameThread extends Thread {
 
         // 倒计时 计时器
         GameTimer.init(GAME_TIME, mainHandler);
-
-
-
     }
 
     @Override
     public void run() {
         super.run();
         while (threadControl) {     // 控制游戏是否允许
-            if (GameFragment.currentGameState == 0) {
+            if (GameFragment.sCurrentGameState == 0) {
                 handleRandom();
                 try {
                     // 控制速度             /////////////////////////////////////////////////////////
                     ++speedControl;
                     if (speedControl > 20) {
-                        Thread.sleep(300);
+                        Thread.sleep(400);
                     } else if (speedControl > 15) {
-                        Thread.sleep(460);
+                        Thread.sleep(560);
                     } else if (speedControl > 10) {
-                        Thread.sleep(550);
+                        Thread.sleep(650);
                     } else if (speedControl > 5) {
-                        Thread.sleep(750);
-                    } else {
                         Thread.sleep(850);
+                    } else {
+                        Thread.sleep(950);
                     }
                 } catch (InterruptedException e) {
                     e.printStackTrace();
@@ -67,9 +65,17 @@ public class GameThread extends Thread {
     private void handleRandom() {
         //随机出来 接下来要出现 精灵的洞
         // 随机产生一个 {0, 1, 2}  中的数, 表示 红, 黄, 蓝 三种地鼠
-        Message.obtain(mainHandler, GameFragment.MSG_WHAT_REFRESH,  randomHole(),gameRandom.nextInt(3))
+        int colorOrPhraseIndex;
+        if(GameFragment.isNormalModel){
+            colorOrPhraseIndex = gameRandom.nextInt(3);
+        }else {
+            colorOrPhraseIndex = PhraseUtils.getCurrentIndex();
+        }
+        Message.obtain(mainHandler,
+                GameFragment.MSG_WHAT_REFRESH,
+                randomHole(),   // 随机的洞
+                colorOrPhraseIndex)
                 .sendToTarget();
-
     }
 
     /**
@@ -88,19 +94,23 @@ public class GameThread extends Thread {
 
             // 执行随机找洞
             primaryHoleIndex = gameRandom.nextInt(12);
-        } while (mOccupyHoleSet.contains(primaryHoleIndex)|| isHolePlaying(primaryHoleIndex));
+        } while (mOccupyHoleSet.contains(primaryHoleIndex) || isHolePlaying(primaryHoleIndex));
         return primaryHoleIndex;
     }
 
     /**
      * 检查洞是否有动画在播放, 这个与 mOccupyHoleSet重复了, 仅作为备选
+     *
      * @param turnUp 洞ID
      * @return 是否有动画播放
      */
     private boolean isHolePlaying(int turnUp) {
-        for (AnimationDrawable[] animationDrawables : mRatAnimationArr) {
-            if (animationDrawables[turnUp].isRunning()) {
-                return true;
+        for (int i = 0; i < mRatAnimationArr.length; i++) {
+            if (!GameFragment.isNormalModel && i != 1)
+                continue;
+            for (int j = 0; j < mRatAnimationArr[i].length; j++) {
+                if (mRatAnimationArr[i][j].isRunning())
+                    return true;
             }
         }
         return false;
@@ -147,7 +157,7 @@ public class GameThread extends Thread {
     ///===参数
     // 游戏时长
 //    private static final long GAME_TIME = 18 * 1000;
-    private static final long GAME_TIME = 4 * 1000;     //todo test
+    private static final long GAME_TIME = 10 * 1000;     //todo test
 
 //    private static final int MAX_MUSHROOM = 12;
 
