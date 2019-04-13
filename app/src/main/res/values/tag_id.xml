@@ -2,4 +2,5 @@
 <resources>
     <item type="id" name="hole_index"/>
     <item type="id" name="hole_current_color" />
+    <item type="id" name="hole_current_phrase_index" />
 </resources>

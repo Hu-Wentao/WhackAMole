@@ -111,19 +111,9 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginEnd="8dp"
-        android:text="0"
+        android:text="0 分"
         android:textSize="18sp"
         app:layout_constraintBaseline_toBaselineOf="@+id/tv_count_down"
-        app:layout_constraintEnd_toStartOf="@+id/textView5" />
-
-    <TextView
-        android:id="@+id/textView5"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginEnd="8dp"
-        android:text="分"
-        android:textSize="18sp"
-        app:layout_constraintBaseline_toBaselineOf="@+id/tv_current_score"
         app:layout_constraintEnd_toEndOf="parent" />
 
     <TextView

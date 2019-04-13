@@ -42,6 +42,8 @@ public class GameFragment extends BaseFragment implements View.OnClickListener {
     public static byte sCurrentGameState = -1;
     // 当前游戏得分
     private int currentScore;
+
+
     // 游戏逻辑线程
     private GameThread mGameThread;
     // 动画数组       3: 3种颜色的地鼠, 12: 12个洞
@@ -56,14 +58,21 @@ public class GameFragment extends BaseFragment implements View.OnClickListener {
     public static final int MSG_WHAT_INTERVAL = 2;
     public static final int MSG_WHAT_END = 3;
     public static final int MSG_WHAT_ANIM_STOP = 4;
+    public static final int MSG_WHAT_HANDLE_PHRASE = 5;
+    public static final int MSG_WHAT_HANDLE_sOccpyHoleSet = 6;
     // Handler arg1, 游戏剩余时间...
     // Handler arg2, 选择模型类型 -> 参见 AniUtils -> RAT_COLOR_*
     //===============挑战模式相关================
     // 成语图 数组
     private static Drawable sPhraseArr[];
+    // 挑战模式下, 剩余的机会
+    private int remainChance = 3;
+    // 挑战模式下 上一个被点击的Phrase图index
+    private int savedPhraseIndex = 0;
+
     // 延后显示成语图/ 提前结束显示成语图 的时长
-    private static final int sGapeTime = 150;
-    // 控件
+    private static final int sGapeTime = 200;
+    // =============控件
 
 
     @Override   // 返回事件
@@ -74,15 +83,14 @@ public class GameFragment extends BaseFragment implements View.OnClickListener {
     @Override
     protected void doInit() {
         isNormalModel = AppData.getBoolean(getContext(), AppData.IS_NORMAL_GAME_MODEL, true);
-        System.out.println("进入INIT方法........"); //todo
         if (sCurrentGameState == 2) { // 如果游戏已结束
-            System.out.println("进入游戏复位代码块");    //todo
             PhraseUtils.onGameRestart();
             if (mGameThread != null)
                 mGameThread.stopGame();
-
+            // 移除上局的游戏结果提示
             findViewById(R.id.constrain_game_result).setVisibility(View.GONE);
-//            findViewById(R.id.tv_pause_tips).callOnClick();
+            // 显示 右上角的 分数
+            findViewById(R.id.tv_current_score).setVisibility(View.VISIBLE);
 
             // 复位所有的洞View
             for (int i = 0; i < sRateHoleArray.size(); i++) {
@@ -182,6 +190,9 @@ public class GameFragment extends BaseFragment implements View.OnClickListener {
         if (sCurrentGameState != 0 || v.getTag(R.id.hole_current_color) == null || v.getTag(R.id.hole_index) == null) {
             return;
         }
+        if (!isNormalModel && v.getTag(R.id.hole_current_phrase_index) == null) { // 挑战模式下, 如果该控件没有phrase_index,则退出
+            return;
+        }
         final int aniColor = (int) v.getTag(R.id.hole_current_color);
         final int holeId = (int) v.getTag(R.id.hole_index);
 
@@ -209,28 +220,36 @@ public class GameFragment extends BaseFragment implements View.OnClickListener {
         aniDrawable.selectDrawable(0);  // 将动画设置到第一张(初始状态)
 
         // 在打击动画播放完毕后, 结束动画
-        view.postDelayed(new Runnable() {
-            @Override
-            public void run() {
-                view.setBackgroundResource(R.drawable.img_rat_public_0);  // 复位该控件背景
-                sHitRatAnimationArr[aniColor][holeId].setVisible(false, false);
-                sHitRatAnimationArr[aniColor][holeId].stop();   // 停止动画
-                sHitRatAnimationArr[aniColor][holeId].selectDrawable(0);    //
-            }
-        }, AniUtils.getAniDuration(true));
-
+        Message m = Message.obtain();
+        m.what = MSG_WHAT_ANIM_STOP;
+        m.arg1 = holeId;
+        m.obj = hitDrawable;
+        mGameHandler.sendMessageDelayed(m, AniUtils.getAniDuration(true));
 
         // 处理动画的播放, 并在mOccupyHoleSet 中标记正在播放动画的洞
         sOccupyHoleSet.add(holeId);
-        view.postDelayed(new Runnable() {
-            @Override
-            public void run() {
-                view.setBackgroundResource(R.drawable.img_rat_public_0);
-                sOccupyHoleSet.remove(holeId);
-            }
-        }, 1500);   // 表示该洞在 delayMillis 秒内不会再出现地鼠
+        Message m1 = Message.obtain();
+        m1.what = MSG_WHAT_HANDLE_sOccpyHoleSet;
+        m1.arg1 = holeId;
+        mGameHandler.sendMessageDelayed(m1, 1500);
 
         // 处理得分情况, //todo 可以在此处同时播放音效
+        String showScore = "";
+        if (!isNormalModel) {
+            // 判分
+            int phraseIndex = (int) v.getTag(R.id.hole_current_phrase_index);
+            if (phraseIndex % 4 != 0) {   // todo 判分逻辑可能有BUG
+                currentScore -= (phraseIndex/4)*20; // 20是黄老鼠的分值
+                if (++savedPhraseIndex != phraseIndex) {
+                    remainChance--;
+                }
+            }
+
+            if (remainChance < 0) {
+                onGameOver();
+            }
+            showScore = "还有" + remainChance + "次机会 ";
+        }
         switch (aniColor) {
             case AniUtils.RAT_COLOR_RED:
                 currentScore += 10;
@@ -242,18 +261,19 @@ public class GameFragment extends BaseFragment implements View.OnClickListener {
                 currentScore -= 15;
                 break;
         }
+        showScore += (String.valueOf(currentScore) + " 分");
         // 更新分数
-        ((TextView) findViewById(R.id.tv_current_score)).setText(String.valueOf(currentScore));
+        ((TextView) findViewById(R.id.tv_current_score)).setText(showScore);
     }
 
-    private void onGameStart(boolean isNormalModel) {
+    private void onGameStart() {
         // 声明游戏开始
         sCurrentGameState = 0;   // 0 : 游戏运行中
         // 初始化游戏数据
         currentScore = 0;
 
         // 开启线程
-        mGameThread = new GameThread( mGameHandler, sOccupyHoleSet);
+        mGameThread = new GameThread(mGameHandler, sOccupyHoleSet);
         mGameThread.setAnimationArr(sRatAnimationArr);
 
         // 开启线轮询
@@ -261,28 +281,31 @@ public class GameFragment extends BaseFragment implements View.OnClickListener {
         mGameThread.startGame();
     }
 
-    private void onGameRefresh(int hole, int colorOrPhraseIndex) {
-        int aniColor = AniUtils.RAT_COLOR_ORANGE;
-        long aniDuration = AniUtils.getAniDuration(false);
+    // 0 show, 1 hide
+    private void processPhraseDisplay(int showOrHide, Object holeView) {
+        if (showOrHide == 0) {
+            ((ImageView) holeView).setImageDrawable(PhraseUtils.getNextDrawable());
+            ((ImageView) holeView).setTag(R.id.hole_current_phrase_index, PhraseUtils.getCurrentIndex()); //为洞配置成语图Index
+        } else {
+            ((ImageView) holeView).setImageDrawable(null);
+        }
+    }
+
+    private void onGameRefresh(int hole, int aniColor) {
         // 获取该洞的view
         final ImageView view = sRateHoleArray.get(hole);
-        if (isNormalModel) {
-            aniColor = colorOrPhraseIndex;
-        } else {                                        // 如果是挑战模式, 则延时 sGapeTime展示成语图
-            aniDuration -= 100;
-            view.postDelayed(new Runnable() {
-                @Override
-                public void run() {
-                    view.setImageDrawable(PhraseUtils.getNextDrawable());
-//                    view.setImageTintList();
-                }
-            }, sGapeTime);
-            view.postDelayed(new Runnable() {
-                @Override
-                public void run() {
-                    view.setImageDrawable(null);
-                }
-            }, AniUtils.getAniDuration(false) - sGapeTime);
+        if (!isNormalModel) {// 如果是挑战模式, 则延时 sGapeTime展示成语图
+            Message mShow = Message.obtain();
+            mShow.what = MSG_WHAT_HANDLE_PHRASE;
+            mShow.arg1 = 0;
+            mShow.obj = view;
+            mGameHandler.sendMessageDelayed(mShow, sGapeTime);
+
+            Message mHide = Message.obtain();
+            mHide.what = MSG_WHAT_HANDLE_PHRASE;
+            mHide.arg1 = 1;
+            mHide.obj = view;
+            mGameHandler.sendMessageDelayed(mHide, AniUtils.getAniDuration(false) - sGapeTime);
         }
         //------------------------------------------------------------------------------------------
         // 要播放的动画
@@ -301,14 +324,13 @@ public class GameFragment extends BaseFragment implements View.OnClickListener {
         obtain.what = MSG_WHAT_ANIM_STOP;
         obtain.arg1 = hole;     // 有点必要
         obtain.obj = targetAniDrawable;
-        mGameHandler.sendMessageDelayed(obtain, aniDuration);
+        mGameHandler.sendMessageDelayed(obtain, AniUtils.getAniDuration(false));
     }
 
     private void onGameOver() {
         // 显示 下一步 面板
         findViewById(R.id.constrain_game_result).setVisibility(View.VISIBLE);
         // 隐藏 右上角的 分数
-        findViewById(R.id.textView5).setVisibility(View.INVISIBLE);
         findViewById(R.id.tv_current_score).setVisibility(View.INVISIBLE);
         // 设置面板上的 分数
         ((TextView) findViewById(R.id.tv_show_score)).setText(currentScore + " 分");
@@ -358,6 +380,8 @@ public class GameFragment extends BaseFragment implements View.OnClickListener {
             GameTimer.play();
             ((ImageView) findViewById(R.id.iv_pause_play)).setImageResource(android.R.drawable.ic_media_pause);
             findViewById(R.id.tv_pause_tips).setVisibility(View.GONE);
+            // 显示 右上角的 分数
+            findViewById(R.id.tv_current_score).setVisibility(View.VISIBLE);
         }
     }
 
@@ -366,7 +390,7 @@ public class GameFragment extends BaseFragment implements View.OnClickListener {
         public boolean handleMessage(Message msg) {
             switch (msg.what) {
                 case MSG_WHAT_START:
-                    onGameStart(isNormalModel);
+                    onGameStart();
                     break;
                 case MSG_WHAT_REFRESH:
                     // 刷新洞, 产生随机数(地洞序号)和要播放的model(什么颜色的老鼠)后,进行操作
@@ -381,8 +405,15 @@ public class GameFragment extends BaseFragment implements View.OnClickListener {
                 case MSG_WHAT_END:
                     onGameOver();
                     break;
-                case MSG_WHAT_ANIM_STOP:
+                case MSG_WHAT_ANIM_STOP:    // 停止动画
                     notifyAniStop(msg);
+                    break;
+                case MSG_WHAT_HANDLE_PHRASE:  // 挑战模式下, 处理成语图的延迟出现于提前消失;
+                    processPhraseDisplay(msg.arg1, msg.obj);
+                    break;
+                case MSG_WHAT_HANDLE_sOccpyHoleSet:
+                    // arg1: 要从Set中移除的ViewID的HoleId
+                    sOccupyHoleSet.remove(msg.arg1);
                     break;
                 default:
                     if (BuildConfig.DEBUG) Log.d("swR+GameFragment", "未处理的点击事件...");

@@ -23,6 +23,8 @@ public class GameThread extends Thread {
     private static final long GAME_TIME = 60 * 1000;
 //    private static final long GAME_TIME = 10 * 1000;     //todo test
 
+    // === 重要变量
+    public static int speedControl;   // 控制游戏节奏
     // 随机线程
     public GameThread(Handler handler, HashSet<Integer> container) {
         // 为 Handler赋值
@@ -46,9 +48,20 @@ public class GameThread extends Thread {
                 handleRandom();
                 // 控制速度             /////////////////////////////////////////////////////////
                 ++speedControl;
-                try {
+                int t = 0;  // 出现老鼠的间隔时间
+                int ratNum = 3 ; // 同时出现的大概老鼠数目(会随时间变化)
+                if(!GameFragment.isNormalModel){
+                    ratNum = 4;
+                    t = 200;
+                }
+                if (speedControl % ratNum == 0) {
                     // speedControl/5 表示每放5次动画变换一档速度,   最长为1s, 最短为0    // 通过调整次数来减慢换挡频率
-                    TimeUnit.MILLISECONDS.sleep((6 - (speedControl / 10)) * 100 + 400);
+                    t += (6 - (speedControl / 15)) * 100 + 600;
+                } else {
+                    t = 350;   // 多出现一个 随机老鼠
+                }
+                try {
+                    TimeUnit.MILLISECONDS.sleep(t);
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
@@ -79,11 +92,6 @@ public class GameThread extends Thread {
         do {
             if (mOccupyHoleSet.size() == 12) {
                 return -1;
-//                try {
-//                    TimeUnit.SECONDS.sleep(5);
-//                } catch (InterruptedException e) {
-//                    e.printStackTrace();
-//                }
             }
             // 执行随机找洞
             primaryHoleIndex = gameRandom.nextInt(12);
@@ -133,7 +141,6 @@ public class GameThread extends Thread {
     }
 
     public void release() {
-
         // todo 背景音乐
 //        if (null != mBgMusicManager) {
 //            mBgMusicManager.stopBackgroundMusic();
@@ -152,12 +159,10 @@ public class GameThread extends Thread {
         mRatAnimationArr = AnimationArr;
     }
 
-    //游戏倒计时,定时发送Message:  MSG_WHAT_INTERVAL
-//    public static CountDownTimer mCountDownTimer;// 与 GAME_TIME 配合, Interval为 1000毫秒
     // TODO 背景音乐
 //    private BackgroundMusic mBgMusicManager;
 
-    private int speedControl;   // 控制游戏节奏
+
     private int bgIndex;
 
 

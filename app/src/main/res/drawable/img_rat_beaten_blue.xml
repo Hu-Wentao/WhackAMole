@@ -1,33 +1,26 @@
 <animation-list xmlns:android="http://schemas.android.com/apk/res/android"
-android:oneshot="true">
-<item
-    android:drawable="@drawable/img_rat_beaten_blue_6"
-    android:duration="25"/>
-<item
-    android:drawable="@drawable/img_rat_beaten_blue_5"
-    android:duration="25"/>
-<item
-    android:drawable="@drawable/img_rat_beaten_blue_4"
-    android:duration="25"/>
-<item
-    android:drawable="@drawable/img_rat_beaten_blue_3"
-    android:duration="25"/>
-<item
-    android:drawable="@drawable/img_rat_beaten_blue_2"
-    android:duration="25"/>
-<item
-    android:drawable="@drawable/img_rat_beaten_blue_1"
-    android:duration="25"/>
-<item
-    android:drawable="@drawable/img_rat_public_blue_3"
-    android:duration="25"/>
-<item
-    android:drawable="@drawable/img_rat_public_blue_2"
-    android:duration="25"/>
-<item
-    android:drawable="@drawable/img_rat_public_blue_1"
-    android:duration="25"/>
-<item
-    android:drawable="@drawable/img_rat_public_0"
-    android:duration="25"/>
+    android:oneshot="true">
+    <item
+        android:drawable="@drawable/img_rat_beaten_blue_4"
+        android:duration="75" />
+    <item
+        android:drawable="@drawable/img_rat_beaten_blue_3"
+        android:duration="50" />
+    <item
+        android:drawable="@drawable/img_rat_beaten_blue_2"
+        android:duration="55" />
+    <item
+        android:drawable="@drawable/img_rat_beaten_blue_1"
+        android:duration="45" />
+
+    <item
+        android:drawable="@drawable/img_rat_public_blue_3"
+        android:duration="35" />
+    <item
+        android:drawable="@drawable/img_rat_public_blue_1"
+        android:duration="25" />
+
+    <item
+        android:drawable="@drawable/img_rat_public_0"
+        android:duration="20" />
 </animation-list>

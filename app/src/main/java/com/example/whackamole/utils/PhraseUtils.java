@@ -49,6 +49,14 @@ public class PhraseUtils {
         return getPhraseArr()[currentIndex++];
     }
 
+    /**
+     * 必须是先调用了 getNextDrawable() 之后, 才能得到正确的currentIndex
+     * @return
+     */
+    public static int getCurrentIndex(){
+        return currentIndex-1;
+    }
+
 
     /**
      * 把白色转换成透明
