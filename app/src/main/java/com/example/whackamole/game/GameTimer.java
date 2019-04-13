@@ -14,11 +14,11 @@ public class GameTimer {
     private static CountDownTimer timer;
 
     private static long saveMillisUntilFinished;
-    private static Handler saveHandler;
+//    private static Handler saveHandler;
     private static int saveSpeedControl;
 
     public static void init(long gameTime, final Handler mHandler){
-        saveHandler = mHandler;
+//        saveHandler = mHandler;
 
         timer = new CountDownTimer(gameTime, 1000) {
             @Override
@@ -34,20 +34,24 @@ public class GameTimer {
         };
     }
 
+    // 开始
     public static void start(){
         timer.start();
     }
+    // 暂停
     public static void pause(){
         timer.cancel();
         saveSpeedControl = GameThread.speedControl;
     }
-    public static void play(){
-        init(saveMillisUntilFinished+1000, saveHandler);
+    // 恢复
+    public static void play(Handler handler){
+        init(saveMillisUntilFinished+1000, handler);
+        start();
         GameThread.speedControl = saveSpeedControl; // 可能没什么用
     }
     public static void cancel(){
         saveMillisUntilFinished = 0;
-        saveHandler = null;
+//        saveHandler = null;
         timer.cancel();
     }
 

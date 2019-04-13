@@ -25,6 +25,7 @@ import com.example.whackamole.utils.VibratorUtils;
 
 import java.util.HashSet;
 
+import butterknife.BindView;
 import butterknife.OnClick;
 
 
@@ -43,6 +44,8 @@ public class GameFragment extends BaseFragment implements View.OnClickListener {
     public static byte sCurrentGameState = -1;
     // 当前游戏得分
     private int currentScore;
+    // 普通模式下, 当前行进到的关卡数
+    public static int currentLevel = 0;
 
 
     // 游戏逻辑线程
@@ -55,12 +58,13 @@ public class GameFragment extends BaseFragment implements View.OnClickListener {
     // 成语图 当前索引 // 使用 PhraseUtils.getIndex() 获取索引
     // Handler 的what类型
     public static final int MSG_WHAT_START = 0;
+    public static final int MSG_WHAT_NEXT_LEVEL = 7;    // 普通模式,进入下一关
     public static final int MSG_WHAT_REFRESH = 1;
     public static final int MSG_WHAT_INTERVAL = 2;
     public static final int MSG_WHAT_END = 3;
     public static final int MSG_WHAT_ANIM_STOP = 4;
     public static final int MSG_WHAT_HANDLE_PHRASE = 5;
-    public static final int MSG_WHAT_HANDLE_sOccpyHoleSet = 6;
+    public static final int MSG_WHAT_HANDLE_sOccupyHoleSet = 6;
     // Handler arg1, 游戏剩余时间...
     // Handler arg2, 选择模型类型 -> 参见 AniUtils -> RAT_COLOR_*
     //===============挑战模式相关================
@@ -84,14 +88,23 @@ public class GameFragment extends BaseFragment implements View.OnClickListener {
     @Override
     protected void doInit() {
         isNormalModel = AppData.getBoolean(AppData.IS_NORMAL_GAME_MODEL, true);
-        if (sCurrentGameState == 2) { // 如果游戏已结束
-            PhraseUtils.onGameRestart();
-            if (mGameThread != null)
-                mGameThread.stopGame();
-            // 复位剩余机会
-            remainChance = 3;
-            // 复位上一个被点击的Phrase图索引
-            savedPhraseIndex = 0;
+        if(sCurrentGameState == -1){
+            findViewById(R.id.constrainGame).setBackgroundResource(R.drawable.ic_game_bg_0);
+        }
+        if (sCurrentGameState == 2) { //如果游戏已结束
+            if (isNormalModel) { // 普通模式
+
+            } else {    // 挑战模式
+                if (mGameThread != null)
+                    mGameThread.stopGame();
+                PhraseUtils.onGameRestart();
+                // 复位当前分数
+                currentScore = 0;
+                // 复位剩余机会
+                remainChance = 3;
+                // 复位上一个被点击的Phrase图索引
+                savedPhraseIndex = 0;
+            }
 
             // 移除上局的游戏结果提示
             findViewById(R.id.constrain_game_result).setVisibility(View.GONE);
@@ -103,8 +116,22 @@ public class GameFragment extends BaseFragment implements View.OnClickListener {
                 sRateHoleArray.get(i).setImageResource(0);
                 sRateHoleArray.get(i).setBackgroundResource(R.drawable.img_rat_public_0);
             }
-//            sCurrentGameState = 0;  // 无需在此处声明游戏开始, 在Handler的onGameStart处更合适
+        } else if (sCurrentGameState == 1) {   // 如果当前为暂停中
+            if (currentLevel >= 3) {   // 如果 普通模式结束
+                // 复位当前分数
+                currentScore = 0;
+                // 复位currentLevel
+                currentLevel = 0;
+//                复位游戏背景
+                findViewById(R.id.constrainGame).setBackgroundResource(R.drawable.ic_game_bg_0);
+            } else { // 如果是普通模式进入下一关
+                // 移除上局的游戏结果提示
+                findViewById(R.id.constrain_game_result).setVisibility(View.GONE);
+                // 显示 右上角的 分数
+                findViewById(R.id.tv_current_score).setVisibility(View.VISIBLE);
+            }
         }
+//            sCurrentGameState = 0;  // 无需在此处声明游戏开始, 在Handler的onGameStart处更合适
 
         {// 初始化一些信息 - 不要改动顺序
             // 动态添加地洞 // 考虑根据情况同时添加TextView
@@ -116,7 +143,7 @@ public class GameFragment extends BaseFragment implements View.OnClickListener {
             }
         }
         {   // 开始游戏逻辑
-            // onGameGuide() // todo 1. 建立一个游戏指引(游戏开始前倒计时之类)
+            // onGameGuide() // todo  建立一个游戏指引(游戏开始前倒计时之类)
             // 倒计时结束, 发送一个Message, 开始游戏
             mGameHandler.sendEmptyMessage(MSG_WHAT_START);
         }
@@ -149,11 +176,9 @@ public class GameFragment extends BaseFragment implements View.OnClickListener {
      */
     private void addRatHole() {
         GridLayout layout = findViewById(R.id.gridlayout_rat_hole);
-        // todo 考虑同时添加一个 TextView, 并将GridView 换成 8行 3列的
         for (int i = 0; i < 12; i++) {
             ImageView iv = new ImageView(getContext());
-
-            iv.setBackgroundResource(R.drawable.img_rat_public_0);   // 设置默认图片 todo 考虑删除
+            iv.setBackgroundResource(R.drawable.img_rat_public_0);   // 设置默认图片
             iv.setTag(R.id.hole_index, i);   // 为hole 添加 tag
             // 添加点击事件监听器
             iv.setOnClickListener(new View.OnClickListener() {
@@ -202,7 +227,7 @@ public class GameFragment extends BaseFragment implements View.OnClickListener {
         final int aniColor = (int) v.getTag(R.id.hole_current_color);
         final int holeId = (int) v.getTag(R.id.hole_index);
         //-----------------------------震动-------------------------------------------------------------
-        if(AppData.getBoolean(AppData.IS_ALLOW_SHAKE, true)){
+        if (AppData.getBoolean(AppData.IS_ALLOW_SHAKE, true)) {
             VibratorUtils.shake(150);
         }
 
@@ -240,20 +265,20 @@ public class GameFragment extends BaseFragment implements View.OnClickListener {
         // 处理动画的播放, 并在mOccupyHoleSet 中标记正在播放动画的洞
         sOccupyHoleSet.add(holeId);
         Message m1 = Message.obtain();
-        m1.what = MSG_WHAT_HANDLE_sOccpyHoleSet;
+        m1.what = MSG_WHAT_HANDLE_sOccupyHoleSet;
         m1.arg1 = holeId;
         mGameHandler.sendMessageDelayed(m1, 1500);
 
-        // 处理得分情况, //todo 可以在此处同时播放音效
+        // 处理得分情况, // 可以在此处同时播放击打音效
         String showScore = "";
         if (!isNormalModel) {
             // 判分
+            // 获取被点击的洞的phrase索引
             int phraseIndex = (int) v.getTag(R.id.hole_current_phrase_index);
-            if (phraseIndex % 4 != 0) {   // todo 判分逻辑可能有BUG
+            // 如果该索引与保存的索引不连续
+            if (++savedPhraseIndex != phraseIndex) {
                 currentScore -= (phraseIndex / 4) * 20; // 20是黄老鼠的分值
-                if (++savedPhraseIndex != phraseIndex) {
-                    remainChance--;
-                }
+                remainChance--;
             }
 
             if (remainChance < 0) {
@@ -280,8 +305,7 @@ public class GameFragment extends BaseFragment implements View.OnClickListener {
     private void onGameStart() {
         // 声明游戏开始
         sCurrentGameState = 0;   // 0 : 游戏运行中
-        // 初始化游戏数据
-        currentScore = 0;
+        // 初始化游戏数据 在 doInit()
 
         // 开启线程
         mGameThread = new GameThread(mGameHandler, sOccupyHoleSet);
@@ -291,6 +315,7 @@ public class GameFragment extends BaseFragment implements View.OnClickListener {
         mGameThread.start();
         mGameThread.startGame();
     }
+
 
     // 0 show, 1 hide
     private void processPhraseDisplay(int showOrHide, Object holeView) {
@@ -349,6 +374,10 @@ public class GameFragment extends BaseFragment implements View.OnClickListener {
         mGameThread.stopGame();
         // 声明游戏结束
         sCurrentGameState = 2;
+        if (isNormalModel && currentLevel < 3) {    // 处于普通模式 并且当前关卡为 {0,1,2}
+            sCurrentGameState = 1;
+        }
+
     }
 
     private void notifyAniStop(Message msg) {
@@ -367,10 +396,25 @@ public class GameFragment extends BaseFragment implements View.OnClickListener {
                 setPauseOrPlay(sCurrentGameState);
                 break;
             case R.id.btn_next:
-                Score.addScore(String.valueOf(currentScore));
-                // 销毁当前Fragment, 前往排行榜
-                GameFragment.this.onDestroy();
-                ((MainActivity) getActivity()).changePage(2);
+                currentLevel++;
+                if (isNormalModel && currentLevel < 3) {   // 前往下一关
+                    // 切换背景
+                    ((TextView)findViewById(R.id.btn_next)).setText("下一关");
+                    findViewById(R.id.constrainGame).setBackgroundResource(this.getResources().getIdentifier("ic_game_bg_" + currentLevel, "drawable", getContext().getPackageName()));
+                    doInit();
+                } else {    // 游戏结算
+                    ((TextView)findViewById(R.id.btn_next)).setText("下一步");
+                    // 复位参数
+                    sCurrentGameState = 2;
+                    currentLevel = 0;
+                    Score.addScore(String.valueOf(currentScore));
+                    currentScore = 0;
+                    ((TextView) findViewById(R.id.tv_current_score)).setText("0 分");
+                    findViewById(R.id.constrainGame).setBackgroundResource(R.drawable.ic_game_bg_0);
+                    // 销毁当前Fragment, 前往排行榜
+                    GameFragment.this.onDestroy();
+                    ((MainActivity) getActivity()).changePage(2);
+                }
                 break;
             default:
                 if (BuildConfig.DEBUG) Log.d("swR+GameFragment", "未处理的点击事件...");
@@ -388,7 +432,7 @@ public class GameFragment extends BaseFragment implements View.OnClickListener {
             findViewById(R.id.tv_pause_tips).setVisibility(View.VISIBLE);
         } else if (gameState == 1) {
             sCurrentGameState = 0;   // 游戏中
-            GameTimer.play();
+            GameTimer.play(mGameHandler);
             ((ImageView) findViewById(R.id.iv_pause_play)).setImageResource(android.R.drawable.ic_media_pause);
             findViewById(R.id.tv_pause_tips).setVisibility(View.GONE);
             // 显示 右上角的 分数
@@ -422,10 +466,13 @@ public class GameFragment extends BaseFragment implements View.OnClickListener {
                 case MSG_WHAT_HANDLE_PHRASE:  // 挑战模式下, 处理成语图的延迟出现于提前消失;
                     processPhraseDisplay(msg.arg1, msg.obj);
                     break;
-                case MSG_WHAT_HANDLE_sOccpyHoleSet:
+                case MSG_WHAT_HANDLE_sOccupyHoleSet:
                     // arg1: 要从Set中移除的ViewID的HoleId
                     sOccupyHoleSet.remove(msg.arg1);
                     break;
+//                case MSG_WHAT_NEXT_LEVEL: // 弃用
+//                    onGameStart(true);
+//                    break;
                 default:
                     if (BuildConfig.DEBUG) Log.d("swR+GameFragment", "未处理的点击事件...");
             }

@@ -24,7 +24,7 @@ public class PhraseUtils {
     private static int currentIndex = 0;
 
     // 在游戏重启时调用
-    public static void onGameRestart() {
+    public static void    onGameRestart() {
         currentIndex = 0;
     }
 

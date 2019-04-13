@@ -22,8 +22,8 @@ import java.util.concurrent.TimeUnit;
 public class GameThread extends Thread {
     ///===快速调整参数
     // 游戏时长
-    private static final long GAME_TIME = 60 * 1000;
-//    private static final long GAME_TIME = 10 * 1000;     //todo test
+//    private static final long GAME_TIME = 60 * 1000;
+    private static final long GAME_TIME = 10 * 1000;
 
     // === 重要变量
     public static int speedControl;   // 控制游戏节奏
@@ -47,21 +47,32 @@ public class GameThread extends Thread {
     public void run() {
         super.run();
         while (threadControl) {     // 控制游戏是否允许
+            // 控制速度             /////////////////////////////////////////////////////////
+
+            int t = 0;  // 出现老鼠的间隔时间
             if (GameFragment.sCurrentGameState == 0) {
                 handleRandom();
-                // 控制速度             /////////////////////////////////////////////////////////
-                ++speedControl;
-                int t = 0;  // 出现老鼠的间隔时间
-                int ratNum = 3; // 同时出现的大概老鼠数目(会随时间变化)
-                if (!GameFragment.isNormalModel) {
-                    ratNum = 4;
-                    t = 200;
-                }
-                if (speedControl % ratNum == 0) {
-                    // speedControl/5 表示每放5次动画变换一档速度,   最长为1s, 最短为0    // 通过调整次数来减慢换挡频率
-                    t += (6 - (speedControl / 15)) * 100 + 600;
-                } else {
-                    t = 350;   // 多出现一个 随机老鼠
+                if (GameFragment.isNormalModel) {                     // 普通模式 不同的关卡不同的速度
+                    switch (GameFragment.currentLevel) {
+                        case 0:
+                            t = 800;
+                            break;
+                        case 1:
+                            t = 600;
+                            break;
+                        case 2:
+                            t = 350;
+                            break;
+                    }
+                } else {                                                // 挑战模式
+                    ++speedControl;
+                    int ratNum = 4; // 同时出现的大概老鼠数目(会随时间变化)
+                    if (speedControl % ratNum == 0) {
+                        // speedControl/5 表示每放5次动画变换一档速度,   最长为1s, 最短为0    // 通过调整次数来减慢换挡频率
+                        t += (6 - (speedControl / 15)) * 100 + 600;
+                    } else {
+                        t = 1;   // 多出现一个 随机老鼠
+                    }
                 }
                 try {
                     TimeUnit.MILLISECONDS.sleep(t);
@@ -163,7 +174,6 @@ public class GameThread extends Thread {
     }
 
     private BackgroundMusic mBgMusicManager;
-
 
     private int bgIndex;
 
