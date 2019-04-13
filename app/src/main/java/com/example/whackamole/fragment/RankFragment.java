@@ -37,7 +37,7 @@ public class RankFragment extends BaseFragment {
     }
     public void onResume() {
         super.onResume();
-        int[] scoreArr = Score.getScoreArr(getContext());
+        int[] scoreArr = Score.getScoreArr();
         if(scoreArr.length == 0){
             setRankVisibility(false);
         }else{

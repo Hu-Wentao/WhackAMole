@@ -6,30 +6,67 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <Button
-        android:id="@+id/btn_normal"
-        android:layout_width="150dp"
-        android:layout_height="wrap_content"
-        android:background="@drawable/shape_radius_button"
-        android:text="音效"
-        android:textColor="#ffffff"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.164"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.436" />
-
-    <Button
-        android:id="@+id/btn_challenge"
+    <LinearLayout
+        android:id="@+id/linearLayout"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginTop="16dp"
+        android:layout_margin="8dp"
+        android:layout_marginTop="8dp"
+        android:layout_marginBottom="8dp"
         android:background="@drawable/shape_radius_button"
-        android:text="震动"
-        android:textColor="#ffffff"
-        app:layout_constraintEnd_toEndOf="@+id/btn_normal"
-        app:layout_constraintStart_toStartOf="@+id/btn_normal"
-        app:layout_constraintTop_toBottomOf="@+id/btn_normal" />
+        android:orientation="vertical"
+        android:paddingStart="32dp"
+        android:paddingTop="16dp"
+        android:paddingEnd="32dp"
+        android:paddingBottom="16dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <Switch
+            android:id="@+id/sw_backMusic"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+
+            android:checked="true"
+            android:text="背景音乐"
+            android:textColor="@color/c1"
+            android:textSize="18sp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.0"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintVertical_bias="0.707" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="32dp"
+        android:background="@drawable/shape_radius_button"
+        android:orientation="vertical"
+        android:paddingStart="32dp"
+        android:paddingTop="16dp"
+        android:paddingEnd="32dp"
+        android:paddingBottom="16dp"
+        app:layout_constraintEnd_toEndOf="@+id/linearLayout"
+        app:layout_constraintStart_toStartOf="@+id/linearLayout"
+        app:layout_constraintTop_toBottomOf="@+id/linearLayout">
+
+        <Switch
+            android:id="@+id/sw_Shake"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:checked="true"
+            android:text="震动"
+            android:textColor="@color/c1"
+            android:textSize="18sp"
+            tools:layout_editor_absoluteX="64dp"
+            tools:layout_editor_absoluteY="546dp" />
+
+    </LinearLayout>
 
 </android.support.constraint.ConstraintLayout>

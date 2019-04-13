@@ -36,11 +36,11 @@ public class StartFragment extends BaseFragment implements View.OnClickListener 
         switch (v.getId()) {
             case R.id.btn_normal:
                 // 设置当前游戏模式
-                AppData.setBoolean(getContext(), AppData.IS_NORMAL_GAME_MODEL, true);
+                AppData.setBoolean( AppData.IS_NORMAL_GAME_MODEL, true);
                 ((MainActivity) mContext).changePage(1);
                 break;
             case R.id.btn_challenge:
-                AppData.setBoolean(getContext(), AppData.IS_NORMAL_GAME_MODEL, false);
+                AppData.setBoolean(AppData.IS_NORMAL_GAME_MODEL, false);
                 ((MainActivity) mContext).changePage(1);
                 break;
             case R.id.btn_rank:

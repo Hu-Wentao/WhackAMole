@@ -13,8 +13,8 @@ public class Score {
     // 4个空间, 每次都将新添加的放在 [3]中
 //    private static String[] scoreArr = new String[4];
 
-    public static int[] getScoreArr(Context c) {
-        String[] arr = AppData.getString(c, AppData.SCORE_ARR_STRING, " ").split(" +");
+    public static int[] getScoreArr() {
+        String[] arr = AppData.getString(AppData.SCORE_ARR_STRING, " ").split(" +");
 
         int[] r = new int[arr.length];
         for (int i = 0; i < arr.length; i++) {
@@ -27,14 +27,14 @@ public class Score {
         if(r.length>3){
             int[] t = new int[3];
             System.arraycopy(r, r.length-3, t, 0, 3);
-            AppData.setString(c, AppData.SCORE_ARR_STRING, t[0]+" "+t[1]+" "+t[2]+" ");
+            AppData.setString(AppData.SCORE_ARR_STRING, t[0]+" "+t[1]+" "+t[2]+" ");
             return t;
         }
         return r;
     }
 
-    public static void addScore(String score, Context c) {
-        AppData.setString(c, AppData.SCORE_ARR_STRING, AppData.getString(c, AppData.SCORE_ARR_STRING, "")+score+" ");  // 存入的是无序数组
+    public static void addScore(String score) {
+        AppData.setString(AppData.SCORE_ARR_STRING, AppData.getString(AppData.SCORE_ARR_STRING, "")+score+" ");  // 存入的是无序数组
     }
 
 

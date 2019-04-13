@@ -8,9 +8,6 @@ import android.os.Build;
 import android.util.Log;
 import android.util.SparseIntArray;
 
-/**
- * Description :
- */
 public class SoundPoolManager implements SoundPool.OnLoadCompleteListener {
 
     private static final String TAG = SoundPoolManager.class.getSimpleName();

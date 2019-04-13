@@ -6,8 +6,10 @@ import android.os.Handler;
 import android.os.Message;
 import android.support.annotation.NonNull;
 
+import com.example.whackamole.data.AppData;
 import com.example.whackamole.fragment.GameFragment;
 import com.example.whackamole.utils.AniUtils;
+import com.example.whackamole.utils.ContextImp;
 import com.example.whackamole.utils.PhraseUtils;
 
 import java.util.HashSet;
@@ -25,6 +27,7 @@ public class GameThread extends Thread {
 
     // === 重要变量
     public static int speedControl;   // 控制游戏节奏
+
     // 随机线程
     public GameThread(Handler handler, HashSet<Integer> container) {
         // 为 Handler赋值
@@ -33,8 +36,8 @@ public class GameThread extends Thread {
         this.gameRandom = new Random();     // 随机数生成器
         this.mOccupyHoleSet = container;  // 存放的是 不允许播放动画的 地洞的序号(防止动画重复播放)
 
-        // todo 背景音乐控制
-//        mBgMusicManager = new BackgroundMusic(context);
+        // 背景音乐控制
+        mBgMusicManager = new BackgroundMusic(ContextImp.getContext());
 
         // 倒计时 计时器
         GameTimer.init(GAME_TIME, mainHandler);
@@ -49,8 +52,8 @@ public class GameThread extends Thread {
                 // 控制速度             /////////////////////////////////////////////////////////
                 ++speedControl;
                 int t = 0;  // 出现老鼠的间隔时间
-                int ratNum = 3 ; // 同时出现的大概老鼠数目(会随时间变化)
-                if(!GameFragment.isNormalModel){
+                int ratNum = 3; // 同时出现的大概老鼠数目(会随时间变化)
+                if (!GameFragment.isNormalModel) {
                     ratNum = 4;
                     t = 200;
                 }
@@ -118,8 +121,9 @@ public class GameThread extends Thread {
     public void startGame() {
         speedControl = 0;
         GameTimer.start();
-        // todo 背景音乐
-//        mBgMusicManager.playBackgroundMusic(getMusic(), true);
+        if (AppData.getBoolean(AppData.IS_ALLOW_BACK_MUSIC, true)) {
+            mBgMusicManager.playBackgroundMusic(getMusic(), true);
+        }
     }
 
     @NonNull
@@ -134,18 +138,17 @@ public class GameThread extends Thread {
     public void stopGame() {
 //        mCountDownTimer.cancel();
         GameTimer.cancel();
-        //todo 背景音乐
-//        mBgMusicManager.stopBackgroundMusic();
-//        mBgMusicManager.end();
+        // 背景音乐
+        mBgMusicManager.stopBackgroundMusic();
+        mBgMusicManager.end();
         threadControl = false;
     }
 
     public void release() {
-        // todo 背景音乐
-//        if (null != mBgMusicManager) {
-//            mBgMusicManager.stopBackgroundMusic();
-//            mBgMusicManager.end();
-//        }
+        if (null != mBgMusicManager) {
+            mBgMusicManager.stopBackgroundMusic();
+            mBgMusicManager.end();
+        }
     }
 
     private boolean threadControl;  // 线程控制..是否开始游戏..
@@ -159,8 +162,7 @@ public class GameThread extends Thread {
         mRatAnimationArr = AnimationArr;
     }
 
-    // TODO 背景音乐
-//    private BackgroundMusic mBgMusicManager;
+    private BackgroundMusic mBgMusicManager;
 
 
     private int bgIndex;

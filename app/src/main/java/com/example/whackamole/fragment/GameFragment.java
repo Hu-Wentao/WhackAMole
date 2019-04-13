@@ -21,6 +21,7 @@ import com.example.whackamole.game.GameThread;
 import com.example.whackamole.game.GameTimer;
 import com.example.whackamole.utils.AniUtils;
 import com.example.whackamole.utils.PhraseUtils;
+import com.example.whackamole.utils.VibratorUtils;
 
 import java.util.HashSet;
 
@@ -82,11 +83,16 @@ public class GameFragment extends BaseFragment implements View.OnClickListener {
 
     @Override
     protected void doInit() {
-        isNormalModel = AppData.getBoolean(getContext(), AppData.IS_NORMAL_GAME_MODEL, true);
+        isNormalModel = AppData.getBoolean(AppData.IS_NORMAL_GAME_MODEL, true);
         if (sCurrentGameState == 2) { // 如果游戏已结束
             PhraseUtils.onGameRestart();
             if (mGameThread != null)
                 mGameThread.stopGame();
+            // 复位剩余机会
+            remainChance = 3;
+            // 复位上一个被点击的Phrase图索引
+            savedPhraseIndex = 0;
+
             // 移除上局的游戏结果提示
             findViewById(R.id.constrain_game_result).setVisibility(View.GONE);
             // 显示 右上角的 分数
@@ -195,7 +201,12 @@ public class GameFragment extends BaseFragment implements View.OnClickListener {
         }
         final int aniColor = (int) v.getTag(R.id.hole_current_color);
         final int holeId = (int) v.getTag(R.id.hole_index);
+        //-----------------------------震动-------------------------------------------------------------
+        if(AppData.getBoolean(AppData.IS_ALLOW_SHAKE, true)){
+            VibratorUtils.shake(150);
+        }
 
+        //-----------------------------动画-------------------------------------------------------------
         // 获取该洞的所属的动画
         AnimationDrawable aniDrawable = sRatAnimationArr[aniColor][holeId];
         // 如果 被点击的洞不在播放动画, 则退出方法 (用户点击了没有播放动画的洞)
@@ -239,7 +250,7 @@ public class GameFragment extends BaseFragment implements View.OnClickListener {
             // 判分
             int phraseIndex = (int) v.getTag(R.id.hole_current_phrase_index);
             if (phraseIndex % 4 != 0) {   // todo 判分逻辑可能有BUG
-                currentScore -= (phraseIndex/4)*20; // 20是黄老鼠的分值
+                currentScore -= (phraseIndex / 4) * 20; // 20是黄老鼠的分值
                 if (++savedPhraseIndex != phraseIndex) {
                     remainChance--;
                 }
@@ -356,7 +367,7 @@ public class GameFragment extends BaseFragment implements View.OnClickListener {
                 setPauseOrPlay(sCurrentGameState);
                 break;
             case R.id.btn_next:
-                Score.addScore(String.valueOf(currentScore), getContext());
+                Score.addScore(String.valueOf(currentScore));
                 // 销毁当前Fragment, 前往排行榜
                 GameFragment.this.onDestroy();
                 ((MainActivity) getActivity()).changePage(2);

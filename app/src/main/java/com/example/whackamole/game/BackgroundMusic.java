@@ -5,11 +5,7 @@ import android.content.res.AssetFileDescriptor;
 import android.media.MediaPlayer;
 import android.util.Log;
 
-/**
- * Description :
- */
 public class BackgroundMusic {
-
     private static final String TAG = "Bg_Music";
     private float mLeftVolume;
     private float mRightVolume;

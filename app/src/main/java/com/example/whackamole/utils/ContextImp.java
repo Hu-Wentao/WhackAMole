@@ -23,7 +23,7 @@ public class ContextImp extends Application {
      * 获取context
      * @return
      */
-    protected static Context getContext(){
+    public static Context getContext(){
         return mContext;
     }
 }
