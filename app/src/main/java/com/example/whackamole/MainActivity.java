@@ -9,6 +9,7 @@ import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
+import android.util.Log;
 import android.view.Window;
 import android.widget.Toast;
 
@@ -41,6 +42,7 @@ public class MainActivity extends AppCompatActivity implements BackHandledInterf
         requestWindowFeature(Window.FEATURE_NO_TITLE);
         setContentView(R.layout.activity_game_main);
         initPage();
+
         changePage(0);
 
 //----------------

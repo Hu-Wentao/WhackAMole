@@ -94,7 +94,6 @@ public abstract class BaseFragment extends Fragment{
             ButterKnife.bind(this, mRootView);
 
             doInit();
-//            doLoadData();
             return mRootView;
         }
         return super.onCreateView(inflater, container, savedInstanceState);

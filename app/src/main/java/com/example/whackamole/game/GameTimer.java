@@ -15,7 +15,7 @@ public class GameTimer {
 
     private static long saveMillisUntilFinished;
 //    private static Handler saveHandler;
-    private static int saveSpeedControl;
+//    private static int saveSpeedControl;
 
     public static void init(long gameTime, final Handler mHandler){
 //        saveHandler = mHandler;
@@ -41,13 +41,13 @@ public class GameTimer {
     // 暂停
     public static void pause(){
         timer.cancel();
-        saveSpeedControl = GameThread.speedControl;
+//        saveSpeedControl = GameThread.speedControl;
     }
     // 恢复
     public static void play(Handler handler){
         init(saveMillisUntilFinished+1000, handler);
         start();
-        GameThread.speedControl = saveSpeedControl; // 可能没什么用
+//        GameThread.speedControl = saveSpeedControl; // 可能没什么用
     }
     public static void cancel(){
         saveMillisUntilFinished = 0;
