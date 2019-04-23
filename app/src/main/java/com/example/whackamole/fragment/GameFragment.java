@@ -86,11 +86,10 @@ public class GameFragment extends BaseFragment implements View.OnClickListener {
 
     @Override
     protected void doInit() {
-        // todo
-        System.out.println("isNormalModel: " + isNormalModel +
-                " sCurrentGameState: " + sCurrentGameState +
-                " currentScore: " + currentScore +
-                " remainChance: " + remainChance + " savedPhraseIndex: " + savedPhraseIndex);
+//        System.out.println("isNormalModel: " + isNormalModel +
+//                " sCurrentGameState: " + sCurrentGameState +
+//                " currentScore: " + currentScore +
+//                " remainChance: " + remainChance + " savedPhraseIndex: " + savedPhraseIndex);
 
         isNormalModel = AppData.getBoolean(AppData.IS_NORMAL_GAME_MODEL, true);
 
@@ -485,8 +484,7 @@ public class GameFragment extends BaseFragment implements View.OnClickListener {
                 case MSG_WHAT_HANDLE_PHRASE:  // 挑战模式下, 处理成语图的延迟出现于提前消失;
                     processPhraseDisplay(msg.arg1, msg.obj);
                     break;
-                case MSG_WHAT_REOME_ITEM_sOccupyHoleSet:
-                    // arg1: 要从Set中移除的ViewID的HoleId
+                case MSG_WHAT_REOME_ITEM_sOccupyHoleSet: // arg1: 要从Set中移除的ViewID的HoleId
                     sOccupyHoleSet.remove(msg.arg1);
                     break;
 
