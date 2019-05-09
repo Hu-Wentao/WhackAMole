@@ -68,7 +68,7 @@ public class GameThread extends Thread {
                     handleRandom();
                     handleRandom();
 
-                    t = 2000;   //todo
+                    t = 2000;
 //                    int ratNum = 4; // 同时出现的大概老鼠数目(会随时间变化)
 //                    if (speedControl % ratNum != 0) {
 //                        // speedControl/5 表示每放5次动画变换一档速度,   最长为1s, 最短为0    // 通过调整次数来减慢换挡频率
@@ -88,7 +88,7 @@ public class GameThread extends Thread {
     }
 
     private void handleRandom() {
-        //随机出来 接下来要出现 精灵的洞
+        //随机出来 接下来要出现 地鼠的洞
         // 随机产生一个 {0, 1, 2}  中的数, 表示 红, 黄, 蓝 三种地鼠
         int i = randomHole();
         if (i == -1) {
@@ -151,11 +151,6 @@ public class GameThread extends Thread {
         }
     }
 
-    @NonNull
-    private String getMusic() {
-        return "game_bg.mp3";
-    }
-
     public void stopGame() {
 //        mCountDownTimer.cancel();
         GameTimer.cancel();
@@ -170,6 +165,11 @@ public class GameThread extends Thread {
             mBgMusicManager.stopBackgroundMusic();
             mBgMusicManager.end();
         }
+    }
+
+    @NonNull
+    private String getMusic() {
+        return "game_bg.mp3";
     }
 
     private boolean threadControl;  // 线程控制..是否开始游戏..
