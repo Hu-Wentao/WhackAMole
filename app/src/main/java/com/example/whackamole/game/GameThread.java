@@ -8,9 +8,8 @@ import android.support.annotation.NonNull;
 import com.example.whackamole.data.AppData;
 import com.example.whackamole.fragment.GameFragment;
 import com.example.whackamole.utils.AniUtils;
-import com.example.whackamole.utils.ContextImp;
+import com.example.whackamole.utils.MyApplication;
 
-import java.util.Arrays;
 import java.util.Random;
 import java.util.concurrent.TimeUnit;
 
@@ -34,7 +33,7 @@ public class GameThread extends Thread {
         this.gameRandom = new Random();     // 随机数生成器
 
         // 背景音乐控制
-        mBgMusicManager = new BackgroundMusic(ContextImp.getContext());
+        mBgMusicManager = new BackgroundMusic(MyApplication.getContext());
 
         // 倒计时 计时器
         GameTimer.init(GAME_TIME, mainHandler);

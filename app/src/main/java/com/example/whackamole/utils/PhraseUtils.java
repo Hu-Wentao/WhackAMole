@@ -29,13 +29,13 @@ public class PhraseUtils {
     }
 
     public static Drawable[] getPhraseArr() {
-        Bitmap[] b = split(BitmapFactory.decodeResource(ContextImp.getContext().getResources(), R.drawable.img_phrase4), phraseImgXY);
+        Bitmap[] b = split(BitmapFactory.decodeResource(MyApplication.getContext().getResources(), R.drawable.img_phrase4), phraseImgXY);
         if (phraseArr == null) {
             phraseArr = new Drawable[phraseImgXY[0] * phraseImgXY[1]];
             for (int i = 0; i < phraseArr.length; i++) {
-//                phraseArr[i] = new BitmapDrawable(ContextImp.getContext().getResources(), zoomImg(b[i], BITMAP_SCALE));   // 没用
-//                phraseArr[i] = new BitmapDrawable(ContextImp.getContext().getResources(), getImageToChange(b[i]));
-                phraseArr[i] = new BitmapDrawable(ContextImp.getContext().getResources(), b[i]);
+//                phraseArr[i] = new BitmapDrawable(MyApplication.getContext().getResources(), zoomImg(b[i], BITMAP_SCALE));   // 没用
+//                phraseArr[i] = new BitmapDrawable(MyApplication.getContext().getResources(), getImageToChange(b[i]));
+                phraseArr[i] = new BitmapDrawable(MyApplication.getContext().getResources(), b[i]);
             }
         }
         return phraseArr;

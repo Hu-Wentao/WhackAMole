@@ -1,17 +1,13 @@
 package com.example.whackamole.fragment;
 
-import android.view.View;
 import android.widget.CompoundButton;
 import android.widget.Switch;
-import android.widget.Toast;
 
 import com.example.whackamole.R;
 import com.example.whackamole.base.BaseFragment;
 import com.example.whackamole.data.AppData;
-import com.example.whackamole.utils.ContextImp;
 
 import butterknife.BindView;
-import butterknife.OnCheckedChanged;
 
 /**
  * @Author: hu.wentao@outlook.com

@@ -12,7 +12,7 @@ public class VibratorUtils {
 
     private static synchronized Vibrator getVibrator(){
         if(vibrator == null){
-            vibrator = (Vibrator)ContextImp.getContext().getSystemService(Context.VIBRATOR_SERVICE);
+            vibrator = (Vibrator) MyApplication.getContext().getSystemService(Context.VIBRATOR_SERVICE);
         }
         return vibrator;
     }

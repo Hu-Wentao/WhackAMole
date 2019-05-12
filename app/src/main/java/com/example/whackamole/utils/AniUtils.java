@@ -56,7 +56,7 @@ public class AniUtils {
      * @return 动画
      */
     public static AnimationDrawable getAnimationByName(int aniType, int aniColor) {
-        Context c = ContextImp.getContext();
+        Context c = MyApplication.getContext();
         if (mRatAnimation.get(aniType + aniColor) == null) {
             // 判断是什么Type
             mRatAnimation.put(aniType + aniColor,    // 开始产生需要的动画
@@ -144,7 +144,7 @@ public class AniUtils {
      * @return 动画
      */
     private static AnimationDrawable getRatAnimation(AnimationDrawable oldAniDrawable, String aniType, String aniColor, int picNum, boolean isPositiveSequence) {
-        Context c = ContextImp.getContext();
+        Context c = MyApplication.getContext();
         for (int i = 0; i < picNum; i++) { // 图片资源序号从1开始到picNum
             Drawable drawable =
                     c.getDrawable(c.getResources().getIdentifier(

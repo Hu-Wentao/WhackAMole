@@ -7,7 +7,7 @@ import android.content.Context;
  * @Author: hu.wentao@outlook.com
  * @Date: 2019/4/12
  */
-public class ContextImp extends Application {
+public class MyApplication extends Application {
     /**
      * 全局的上下文
      */

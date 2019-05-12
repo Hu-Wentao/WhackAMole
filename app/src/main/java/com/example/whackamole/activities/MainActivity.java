@@ -1,5 +1,6 @@
-package com.example.whackamole;
+package com.example.whackamole.activities;
 
+import android.content.Intent;
 import android.graphics.drawable.Drawable;
 import android.os.CountDownTimer;
 import android.support.v7.app.AppCompatActivity;
@@ -13,8 +14,11 @@ import android.util.Log;
 import android.view.Window;
 import android.widget.Toast;
 
+import com.example.whackamole.BuildConfig;
+import com.example.whackamole.R;
 import com.example.whackamole.base.BackHandledInterface;
 import com.example.whackamole.base.BaseFragment;
+import com.example.whackamole.data.AppData;
 import com.example.whackamole.fragment.GameFragment;
 import com.example.whackamole.fragment.RankFragment;
 import com.example.whackamole.fragment.SettingFragment;
@@ -42,9 +46,7 @@ public class MainActivity extends AppCompatActivity implements BackHandledInterf
         requestWindowFeature(Window.FEATURE_NO_TITLE);
         setContentView(R.layout.activity_game_main);
         initPage();
-
         changePage(0);
-
 //----------------
 //        final LinearLayout test = findViewById(R.id.testLayout);
 //        test.setVisibility(View.VISIBLE);
@@ -65,12 +67,19 @@ public class MainActivity extends AppCompatActivity implements BackHandledInterf
 //        };
 //        t.start();
 //-----------------
-
+    }
+    @Override
+    public void onStart(){
+        super.onStart();
+        // 检查当前是否登录了账号
+        if(AppData.getCurrentAccount() == null){
+            if (BuildConfig.DEBUG) Log.d("MainActivity", "检测当前账户为null, 正在启动LoginActivity");
+            startActivity(new Intent(MainActivity.this, LoginActivity.class));
+        }
     }
 
     private void initPage() {
         mFragmentArr = new Fragment[4];
-
         mStartFragment = new StartFragment();
         mGameFragment = new GameFragment();
         mRankFragment = new RankFragment();

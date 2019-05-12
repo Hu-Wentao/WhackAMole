@@ -12,11 +12,11 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.example.whackamole.BuildConfig;
-import com.example.whackamole.MainActivity;
+import com.example.whackamole.activities.MainActivity;
 import com.example.whackamole.R;
 import com.example.whackamole.base.BaseFragment;
 import com.example.whackamole.data.AppData;
-import com.example.whackamole.data.Score;
+import com.example.whackamole.data.ScoreUtil;
 import com.example.whackamole.game.GameThread;
 import com.example.whackamole.game.GameTimer;
 import com.example.whackamole.utils.AniUtils;
@@ -425,7 +425,7 @@ public class GameFragment extends BaseFragment implements View.OnClickListener {
                     ((TextView) findViewById(R.id.btn_next)).setText("下一步");
                     // 复位参数
                     currentLevel = 0;
-                    Score.addScore(String.valueOf(currentScore));
+                    ScoreUtil.addScore(AppData.getCurrentAccount(), currentScore);
                     currentScore = 0;
                     ((TextView) findViewById(R.id.tv_current_score)).setText("0 分");
                     // 销毁当前Fragment, 前往排行榜
