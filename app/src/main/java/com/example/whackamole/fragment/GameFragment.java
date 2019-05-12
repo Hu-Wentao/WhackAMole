@@ -24,14 +24,11 @@ import com.example.whackamole.utils.PhraseUtils;
 import com.example.whackamole.utils.VibratorUtils;
 
 import java.util.HashSet;
+import java.util.Objects;
 
 import butterknife.OnClick;
 
 
-/**
- * @Author: hu.wentao@outlook.com
- * @Date: 2019/4/7
- */
 public class GameFragment extends BaseFragment implements View.OnClickListener {
     // 老鼠洞 ImageView list
     private static SparseArray<ImageView> sRateHoleArray = new SparseArray<>(12);
@@ -68,7 +65,7 @@ public class GameFragment extends BaseFragment implements View.OnClickListener {
     // Handler arg2, 选择模型类型 -> 参见 AniUtils -> RAT_COLOR_*
     //===============挑战模式相关================
     // 成语图 数组
-    private static Drawable sPhraseArr[];
+    private static Drawable[] sPhraseArr;
     // 挑战模式下, 剩余的机会
     private int remainChance = 3;
     // 挑战模式下 上一个被点击的Phrase图index
@@ -94,10 +91,8 @@ public class GameFragment extends BaseFragment implements View.OnClickListener {
         isNormalModel = AppData.getBoolean(AppData.IS_NORMAL_GAME_MODEL, true);
 
         if (!isNormalModel) { // 挑战模式
-            System.out.println("tag进入挑战模式");    //todo
-            if(sCurrentGameState == 2 || sCurrentGameState == -1) {
-                System.out.println("tag进入初始化页面挑战模式页(gameState == 2");   //todo
-                findViewById(R.id.constrainGame).setBackgroundResource(R.drawable.ic_game_bg_0);
+            if (sCurrentGameState == 2 || sCurrentGameState == -1) {
+                Objects.requireNonNull(findViewById(R.id.constrainGame)).setBackgroundResource(R.drawable.ic_game_bg_0);
 
                 if (mGameThread != null)
                     mGameThread.stopGame();
@@ -110,20 +105,20 @@ public class GameFragment extends BaseFragment implements View.OnClickListener {
                 savedPhraseIndex = 0;
 
                 // 移除上局的游戏结果提示
-                findViewById(R.id.constrain_game_result).setVisibility(View.GONE);
+                Objects.requireNonNull(findViewById(R.id.constrain_game_result)).setVisibility(View.GONE);
                 // 显示 右上角的 分数
-                findViewById(R.id.tv_current_score).setVisibility(View.VISIBLE);
+                Objects.requireNonNull(findViewById(R.id.tv_current_score)).setVisibility(View.VISIBLE);
             }
         } else {
             if (sCurrentGameState == -1) {
-                findViewById(R.id.constrainGame).setBackgroundResource(R.drawable.ic_game_bg_0);
+                Objects.requireNonNull(findViewById(R.id.constrainGame)).setBackgroundResource(R.drawable.ic_game_bg_0);
             }
             if (sCurrentGameState == 2) { //如果游戏已结束
 
                 // 移除上局的游戏结果提示
-                findViewById(R.id.constrain_game_result).setVisibility(View.GONE);
+                Objects.requireNonNull(findViewById(R.id.constrain_game_result)).setVisibility(View.GONE);
                 // 显示 右上角的 分数
-                findViewById(R.id.tv_current_score).setVisibility(View.VISIBLE);
+                Objects.requireNonNull(findViewById(R.id.tv_current_score)).setVisibility(View.VISIBLE);
 
                 // 复位所有的洞View
                 for (int i = 0; i < sRateHoleArray.size(); i++) {
@@ -137,12 +132,12 @@ public class GameFragment extends BaseFragment implements View.OnClickListener {
                     // 复位currentLevel
                     currentLevel = 0;
 //                复位游戏背景
-                    findViewById(R.id.constrainGame).setBackgroundResource(R.drawable.ic_game_bg_0);
+                    Objects.requireNonNull(findViewById(R.id.constrainGame)).setBackgroundResource(R.drawable.ic_game_bg_0);
                 } else { // 如果是普通模式进入下一关
                     // 移除上局的游戏结果提示
-                    findViewById(R.id.constrain_game_result).setVisibility(View.GONE);
+                    Objects.requireNonNull(findViewById(R.id.constrain_game_result)).setVisibility(View.GONE);
                     // 显示 右上角的 分数
-                    findViewById(R.id.tv_current_score).setVisibility(View.VISIBLE);
+                    Objects.requireNonNull(findViewById(R.id.tv_current_score)).setVisibility(View.VISIBLE);
                 }
             }
         }
@@ -179,8 +174,8 @@ public class GameFragment extends BaseFragment implements View.OnClickListener {
                 continue;
             }
             for (int j = 0; j < sRatAnimationArr[i].length; j++) {
-                sRatAnimationArr[i][j] = (AnimationDrawable) AniUtils.getAnimationByName(AniUtils.RAT_TYPE_NORMAL, i).getConstantState().newDrawable();
-                sHitRatAnimationArr[i][j] = (AnimationDrawable) AniUtils.getAnimationByName(AniUtils.RAT_TYPE_BEATEN, i).getConstantState().newDrawable();
+                sRatAnimationArr[i][j] = (AnimationDrawable) Objects.requireNonNull(AniUtils.getAnimationByName(AniUtils.RAT_TYPE_NORMAL, i).getConstantState()).newDrawable();
+                sHitRatAnimationArr[i][j] = (AnimationDrawable) Objects.requireNonNull(AniUtils.getAnimationByName(AniUtils.RAT_TYPE_BEATEN, i).getConstantState()).newDrawable();
             }
         }
     }
@@ -194,7 +189,7 @@ public class GameFragment extends BaseFragment implements View.OnClickListener {
         if (layout != null)
             layout.removeAllViews();
         for (int i = 0; i < 12; i++) {
-            ImageView iv = new ImageView(getContext());
+            ImageView iv = new ImageView(mContext);
             iv.setBackgroundResource(R.drawable.img_rat_public_0);   // 设置默认图片
             iv.setTag(R.id.hole_index, i);   // 为hole 添加 tag
             // 添加点击事件监听器
@@ -224,6 +219,7 @@ public class GameFragment extends BaseFragment implements View.OnClickListener {
             }
 
             // 将控件添加到GridView
+            assert layout != null;
             layout.addView(iv, layoutParams);
         }
     }
@@ -314,9 +310,9 @@ public class GameFragment extends BaseFragment implements View.OnClickListener {
                 currentScore -= 15;
                 break;
         }
-        showScore += (String.valueOf(currentScore) + " 分");
+        showScore += (currentScore + " 分");
         // 更新分数
-        ((TextView) findViewById(R.id.tv_current_score)).setText(showScore);
+        ((TextView) Objects.requireNonNull(findViewById(R.id.tv_current_score))).setText(showScore);
     }
 
     private void onGameStart() {
@@ -382,16 +378,16 @@ public class GameFragment extends BaseFragment implements View.OnClickListener {
 
     private void onGameOver() {
         // 显示 下一步 面板
-        findViewById(R.id.constrain_game_result).setVisibility(View.VISIBLE);
+        Objects.requireNonNull(findViewById(R.id.constrain_game_result)).setVisibility(View.VISIBLE);
         // 隐藏 右上角的 分数
-        findViewById(R.id.tv_current_score).setVisibility(View.INVISIBLE);
+        Objects.requireNonNull(findViewById(R.id.tv_current_score)).setVisibility(View.INVISIBLE);
         // 设置面板上的 分数
-        ((TextView) findViewById(R.id.tv_show_score)).setText(currentScore + " 分");
+        ((TextView) Objects.requireNonNull(findViewById(R.id.tv_show_score))).setText((currentScore + " 分"));
         // 执行游戏结束
         mGameThread.stopGame();
         // 声明游戏结束
         sCurrentGameState = 2;
-        if (isNormalModel && currentLevel < 2) {    // 处于普通模式 并且当前关卡为 {0,1,2} //todo
+        if (isNormalModel && currentLevel < 2) {    // 处于普通模式 并且当前关卡为 {0,1,2}
             sCurrentGameState = 1;
         }
 
@@ -405,7 +401,6 @@ public class GameFragment extends BaseFragment implements View.OnClickListener {
         sOccupyHoleSet.remove(msg.arg1);
     }
 
-
     @Override
     @OnClick({R.id.iv_pause_play, R.id.btn_next})
     public void onClick(View v) {
@@ -418,20 +413,20 @@ public class GameFragment extends BaseFragment implements View.OnClickListener {
                 currentLevel++;
                 if (isNormalModel && currentLevel < 3) {   // 前往下一关
                     // 切换背景
-                    ((TextView) findViewById(R.id.btn_next)).setText("下一关");
-                    findViewById(R.id.constrainGame).setBackgroundResource(this.getResources().getIdentifier("ic_game_bg_" + currentLevel, "drawable", getContext().getPackageName()));
+                    ((TextView) Objects.requireNonNull(findViewById(R.id.btn_next))).setText("下一关");
+                    Objects.requireNonNull(findViewById(R.id.constrainGame)).setBackgroundResource(this.getResources().getIdentifier("ic_game_bg_" + currentLevel, "drawable", mContext.getPackageName()));
                     doInit();
                 } else {    // 游戏结算
-                    ((TextView) findViewById(R.id.btn_next)).setText("下一步");
+                    ((TextView) Objects.requireNonNull(findViewById(R.id.btn_next))).setText("下一步");
                     // 复位参数
                     currentLevel = 0;
                     ScoreUtil.addScore(AppData.getCurrentAccount(), currentScore);
                     currentScore = 0;
-                    ((TextView) findViewById(R.id.tv_current_score)).setText("0 分");
+                    ((TextView) Objects.requireNonNull(findViewById(R.id.tv_current_score))).setText("0 分");
                     // 销毁当前Fragment, 前往排行榜
                     GameFragment.this.onDestroy();
-                    ((MainActivity) getActivity()).changePage(2);
-                    findViewById(R.id.constrainGame).setBackgroundResource(R.drawable.ic_game_bg_0);
+                    ((MainActivity) Objects.requireNonNull(getActivity())).changePage(2);
+                    Objects.requireNonNull(findViewById(R.id.constrainGame)).setBackgroundResource(R.drawable.ic_game_bg_0);
                 }
                 break;
             default:
@@ -446,15 +441,15 @@ public class GameFragment extends BaseFragment implements View.OnClickListener {
         if (gameState == 0) {
             sCurrentGameState = 1;   //暂停
             GameTimer.pause();
-            ((ImageView) findViewById(R.id.iv_pause_play)).setImageResource(android.R.drawable.ic_media_play);
-            findViewById(R.id.tv_pause_tips).setVisibility(View.VISIBLE);
+            ((ImageView) Objects.requireNonNull(findViewById(R.id.iv_pause_play))).setImageResource(android.R.drawable.ic_media_play);
+            Objects.requireNonNull(findViewById(R.id.tv_pause_tips)).setVisibility(View.VISIBLE);
         } else if (gameState == 1) {
             sCurrentGameState = 0;   // 游戏中
             GameTimer.play(mGameHandler);
-            ((ImageView) findViewById(R.id.iv_pause_play)).setImageResource(android.R.drawable.ic_media_pause);
-            findViewById(R.id.tv_pause_tips).setVisibility(View.GONE);
+            ((ImageView) Objects.requireNonNull(findViewById(R.id.iv_pause_play))).setImageResource(android.R.drawable.ic_media_pause);
+            Objects.requireNonNull(findViewById(R.id.tv_pause_tips)).setVisibility(View.GONE);
             // 显示 右上角的 分数
-            findViewById(R.id.tv_current_score).setVisibility(View.VISIBLE);
+            Objects.requireNonNull(findViewById(R.id.tv_current_score)).setVisibility(View.VISIBLE);
         }
     }
 
@@ -473,7 +468,7 @@ public class GameFragment extends BaseFragment implements View.OnClickListener {
                 case MSG_WHAT_INTERVAL:
                     // 更新当前分数, 更新剩余时间
                     // arg1 : 剩余秒数, arg2: 无意义
-                    ((TextView) findViewById(R.id.tv_count_down)).setText(String.valueOf(msg.arg1) + "秒");
+                    ((TextView) Objects.requireNonNull(findViewById(R.id.tv_count_down))).setText((msg.arg1 + "秒"));
                     break;
                 case MSG_WHAT_END:
                     onGameOver();

@@ -22,8 +22,6 @@ public class GameThread extends Thread {
 //    private static final long GAME_TIME = 60 * 1000;
     private static final long GAME_TIME = 10 * 1000;
 
-    // === 重要变量
-    public static int speedControl;   // 控制游戏节奏
 
     // 随机线程
     public GameThread(Handler handler) {
@@ -61,21 +59,8 @@ public class GameThread extends Thread {
                             break;
                     }
                 } else {                                                // 挑战模式
-//                    ++speedControl;   // 没什么用, 挑战模式无需控制速度
-                    handleRandom();
-                    handleRandom();
-                    handleRandom();
-                    handleRandom();
-
-                    t = 2000;
-//                    int ratNum = 4; // 同时出现的大概老鼠数目(会随时间变化)
-//                    if (speedControl % ratNum != 0) {
-//                        // speedControl/5 表示每放5次动画变换一档速度,   最长为1s, 最短为0    // 通过调整次数来减慢换挡频率
-////                        t += (6 - (speedControl / 15)) * 100 + 600;
-//                        t = 1500;
-//                    } else {
-//                        t = 1;   // 多出现一个 随机老鼠
-//                    }
+                    handleRandom(4);    // 同时出现4只老鼠
+                    t = 3000;
                 }
                 try {
                     TimeUnit.MILLISECONDS.sleep(t);
@@ -100,6 +85,11 @@ public class GameThread extends Thread {
                 GameFragment.isNormalModel ? gameRandom.nextInt(3) : AniUtils.RAT_COLOR_ORANGE)
                 .sendToTarget();
     }
+    private void handleRandom(int repeat){
+        while (repeat-->0){
+            handleRandom();
+        }
+    }
 
     /**
      * 找到一个未播放的洞
@@ -119,9 +109,7 @@ public class GameThread extends Thread {
         Message m = Message.obtain();
         m.what = GameFragment.MSG_WHAT_REOME_ITEM_sOccupyHoleSet;
         m.arg1 = primaryHoleIndex;
-        mainHandler.sendMessageDelayed(m, AniUtils.getAniDuration(false)+200);
-
-//        System.out.println(Arrays.toString(GameFragment.sOccupyHoleSet.toArray()));                 //todo
+        mainHandler.sendMessageDelayed(m, AniUtils.getAniDuration(false) + 200);
 
         return primaryHoleIndex;
     }
@@ -143,7 +131,6 @@ public class GameThread extends Thread {
     }
 
     public void startGame() {
-        speedControl = 0;
         GameTimer.start();
         if (AppData.getBoolean(AppData.IS_ALLOW_BACK_MUSIC, true)) {
             mBgMusicManager.playBackgroundMusic(getMusic(), true);
@@ -175,12 +162,8 @@ public class GameThread extends Thread {
 
     private Handler mainHandler;    // 传入的Handler
     private Random gameRandom;      // 随机数
-//    private HashSet<Integer> mOccupyHoleSet;  // 存放的是地洞序号,...
 
     private AnimationDrawable[][] mRatAnimationArr = GameFragment.sRatAnimationArr;
-//    public void setAnimationArr(AnimationDrawable[][] AnimationArr) {
-//        mRatAnimationArr = AnimationArr;
-//    }
 
     private BackgroundMusic mBgMusicManager;
 

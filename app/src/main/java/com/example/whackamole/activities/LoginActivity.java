@@ -84,7 +84,7 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
             mTitleView.setText("管理员登录");
             mLoginButton.setText("管理员登录");
         } else {
-            mTitleView.setText("登录");
+            mTitleView.setText("用户登录");
             mLoginButton.setText("登录");
         }
 

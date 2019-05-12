@@ -13,10 +13,6 @@ import com.example.whackamole.R;
 
 import java.util.Arrays;
 
-/**
- * @Author: hu.wentao@outlook.com
- * @Date: 2019/5/12
- */
 public class RankAdapter extends RecyclerView.Adapter<RankAdapter.ViewHolder> {
     private Record[] recordArr;
     private boolean isAdmin;
@@ -45,7 +41,7 @@ public class RankAdapter extends RecyclerView.Adapter<RankAdapter.ViewHolder> {
         }else {
             viewHolder.tvRecordAccount.setVisibility(View.INVISIBLE);
         }
-        viewHolder.getTvRecordScore.setText(String.valueOf(recordArr[i].getRecordScore()));
+        viewHolder.getTvRecordScore.setText((recordArr[i].getRecordScore()+"分"));
     }
 
     @Override
@@ -53,11 +49,11 @@ public class RankAdapter extends RecyclerView.Adapter<RankAdapter.ViewHolder> {
         return recordArr.length;
     }
 
-    public class ViewHolder extends RecyclerView.ViewHolder {
+    class ViewHolder extends RecyclerView.ViewHolder {
         final TextView tvIndex;
         final TextView tvRecordAccount;
         final TextView getTvRecordScore;
-        public ViewHolder(@NonNull View itemView) {
+        ViewHolder(@NonNull View itemView) {
             super(itemView);
             tvIndex = itemView.findViewById(R.id.tv_index);
             tvRecordAccount = itemView.findViewById(R.id.tv_recordAccount);

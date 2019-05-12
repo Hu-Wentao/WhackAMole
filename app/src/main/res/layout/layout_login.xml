@@ -32,7 +32,8 @@
                     android:layout_height="match_parent"
                     android:layout_alignParentLeft="true"
                     android:layout_alignParentStart="true"
-                    android:background="#2fa881" />
+                    android:background="#2fa881"
+                    tools:ignore="RtlHardcoded" />
 
                 <TextView
                     android:id="@+id/tv_title"
@@ -44,7 +45,8 @@
                     android:text="@string/user_login"
                     android:textColor="#2fa881"
                     android:textSize="18sp"
-                    android:textStyle="bold" />
+                    android:textStyle="bold"
+                    tools:ignore="RtlHardcoded" />
 
             </RelativeLayout>
 
@@ -74,7 +76,8 @@
                         android:paddingBottom="2dp"
                         android:textColor="#2fa881"
                         android:textCursorDrawable="@drawable/bg_input_cursor"
-                        android:textSize="13sp" />
+                        android:textSize="13sp"
+                        tools:ignore="Autofill,UnusedAttribute" />
                 </android.support.design.widget.TextInputLayout>
 
 
@@ -107,7 +110,8 @@
                         android:paddingBottom="2dp"
                         android:textColor="#2fa881"
                         android:textCursorDrawable="@drawable/bg_input_cursor"
-                        android:textSize="13sp" />
+                        android:textSize="13sp"
+                        tools:ignore="Autofill" />
                 </android.support.design.widget.TextInputLayout>
 
 
@@ -123,11 +127,13 @@
                     android:id="@+id/bt_login"
                     android:layout_width="150dp"
                     android:layout_height="50dp"
-                    android:background="@drawable/bt_shape"
+                    android:background="@drawable/shape_radius"
+                    android:backgroundTint="@android:color/holo_orange_light"
                     android:stateListAnimator="@drawable/state_list_animator_z"
                     android:text="@string/login"
-                    android:textColor="#d3d3d3"
-                    android:textSize="16sp"
+                    android:textColor="#fff"
+                    android:textSize="18sp"
+
                     tools:targetApi="lollipop"/>
             </RelativeLayout>
 
